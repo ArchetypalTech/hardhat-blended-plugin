@@ -1,15 +1,14 @@
-import { extendConfig, task, subtask } from "hardhat/config";
+import fs from "fs";
+import { ensureDirSync } from "fs-extra";
+import { extendConfig, subtask, task } from "hardhat/config";
 import {
-  HardhatUserConfig,
   HardhatConfig,
   HardhatRuntimeEnvironment,
+  HardhatUserConfig,
 } from "hardhat/types";
-import { execSync } from "child_process";
 import path from "path";
-import fs from "fs";
-import { getOutputDir } from "./utils";
-import { build } from "./compiler";
-import { ensureDirSync } from "fs-extra";
+import { compileAndGetBytecode } from "./compiler";
+import { getInterfaceArtifact } from "./utils";
 
 const WASM_FORMAT = "hh-wasm-artifact-1";
 
@@ -18,59 +17,17 @@ interface ContractCompileConfig {
   interfacePath: string;
 }
 
-function getBytecode(wasmPath: string): string {
-  if (!fs.existsSync(wasmPath)) {
-    throw new Error(`Bytecode file not found at ${wasmPath}`);
-  }
-
-  const wasmBinary = fs.readFileSync(wasmPath);
-
-  return `0x${wasmBinary.toString("hex")}`;
-}
-
-function compileToWasm(rootPath: string, contractDir: string): string {
-  console.log(`Compiling Rust project at ${contractDir}`);
-  const pkgName = path.basename(contractDir).replace("-", "_");
-  try {
-    build({
-      contractDir: contractDir,
-      pkgName: pkgName,
-      absolutePath: rootPath,
-    });
-    console.log("Rust project compiled successfully.");
-    return getBytecode(
-      path.join(rootPath, contractDir, "bin", `${pkgName}.wasm`)
-    );
-  } catch (error) {
-    console.error("Failed to compile Rust project.");
-    throw error;
-  }
-}
-
-function getInterfaceArtifact(interfacePath: string, artifactsPath: string) {
-  // Generate artifact object using ABI from Hardhat artifacts
-  const contractName = path.basename(interfacePath, ".sol");
-  const artifactPath = path.join(
-    artifactsPath,
-    "contracts",
-    `${contractName}.sol`,
-    `${contractName}.json`
-  );
-
-  if (!fs.existsSync(artifactPath)) {
-    throw new Error(`ABI file not found at ${artifactPath}`);
-  }
-
-  const artifact = JSON.parse(fs.readFileSync(artifactPath, "utf8"));
-  return artifact;
-}
-
+/**
+ * Compiles a contract and generates an artifact file.
+ * @param cfg - The contract compile configuration.
+ * @param hre - The Hardhat runtime environment.
+ */
 function compileContract(
   cfg: ContractCompileConfig,
   hre: HardhatRuntimeEnvironment
 ) {
-  const outputDir = getOutputDir(hre.config.paths.artifacts, cfg.contractDir);
-  console.log(`${hre.config.paths.root}`);
+  const outputDir = path.join(hre.config.paths.artifacts, cfg.contractDir);
+
   // Get the interface artifact
   const interfaceArtifact = getInterfaceArtifact(
     cfg.interfacePath,
@@ -80,7 +37,9 @@ function compileContract(
   const contractName = path.basename(cfg.contractDir);
 
   // Compile the Rust project
-  const bytecode = compileToWasm(hre.config.paths.root, cfg.contractDir);
+  const bytecode = compileAndGetBytecode(
+    path.join(hre.config.paths.root, cfg.contractDir)
+  );
 
   const artifact = {
     _format: WASM_FORMAT,
@@ -113,6 +72,7 @@ extendConfig(
 
 subtask("compile-to-wasm", "Compiles the Rust project").setAction(
   async (_, hre) => {
+    console.log("Compiling Rust contracts...");
     const compileConfigs = hre.config.compileToWasmConfig;
 
     for (const cfg of compileConfigs) {
@@ -130,8 +90,8 @@ task("compile", "Compiles the entire project, including Rust").setAction(
 
 declare module "hardhat/types/config" {
   interface ContractCompileConfig {
-    contractDir: string;
-    interfacePath: string;
+    contractDir: string; // The relative path to the Rust contract directory from the project root. For example, "contracts/my_contract".
+    interfacePath: string; // The relative path to the Solidity interface that corresponds to the Rust contract. For example, "contracts/IMyContract.sol".
   }
   interface HardhatUserConfig {
     compileToWasmConfig?: ContractCompileConfig[];
