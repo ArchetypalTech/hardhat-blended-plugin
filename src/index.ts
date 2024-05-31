@@ -24,21 +24,21 @@ interface ContractCompileConfig {
  */
 function compileContract(
   cfg: ContractCompileConfig,
-  hre: HardhatRuntimeEnvironment
+  hre: HardhatRuntimeEnvironment,
 ) {
   const outputDir = path.join(hre.config.paths.artifacts, cfg.contractDir);
 
   // Get the interface artifact
   const interfaceArtifact = getInterfaceArtifact(
     cfg.interfacePath,
-    hre.config.paths.artifacts
+    hre.config.paths.artifacts,
   );
 
   const contractName = path.basename(cfg.contractDir);
 
   // Compile the Rust project
   const bytecode = compileAndGetBytecode(
-    path.join(hre.config.paths.root, cfg.contractDir)
+    path.join(hre.config.paths.root, cfg.contractDir),
   );
 
   const artifact = {
@@ -67,7 +67,7 @@ extendConfig(
         contractDir: cfg.contractDir,
         interfacePath: cfg.interfacePath,
       })) ?? [];
-  }
+  },
 );
 
 subtask(
@@ -90,7 +90,7 @@ Configuration:
 
   Fields:
     - contractDir: The relative path to the Rust contract directory from the project root. For example, "contracts/my_rust_contract".
-    - interfacePath: The relative path to the Solidity interface that corresponds to the Rust contract. For example, "contracts/IMyContract.sol`
+    - interfacePath: The relative path to the Solidity interface that corresponds to the Rust contract. For example, "contracts/IMyContract.sol`,
 ).setAction(async (_, hre) => {
   console.log("Compiling Rust contracts...");
   const compileConfigs = hre.config.compileToWasmConfig;
@@ -104,7 +104,7 @@ task("compile", "Compiles the entire project, including Rust").setAction(
   async (_, hre, runSuper) => {
     await runSuper();
     await hre.run("compile-to-wasm");
-  }
+  },
 );
 
 declare module "hardhat/types/config" {

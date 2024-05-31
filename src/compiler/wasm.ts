@@ -8,11 +8,11 @@ const RUSTFLAGS =
 export function compileRustToWasm(
   projectPath: string,
   outputDir: string,
-  pkgName: string
+  pkgName: string,
 ): string {
   const wasmTarget = path.join(
     projectPath,
-    `target/wasm32-unknown-unknown/release/${pkgName}.wasm`
+    `target/wasm32-unknown-unknown/release/${pkgName}.wasm`,
   );
   const wasmOutputFile = path.join(projectPath, outputDir, `${pkgName}.wasm`);
 
@@ -23,7 +23,7 @@ export function compileRustToWasm(
         cwd: projectPath,
         env: { ...process.env, RUSTFLAGS },
         stdio: "inherit",
-      }
+      },
     );
 
     copyFileSync(wasmTarget, wasmOutputFile);

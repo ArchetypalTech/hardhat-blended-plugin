@@ -12,12 +12,12 @@ function compileRustToWasm(projectPath, outputDir, pkgName) {
     const wasmTarget = path_1.default.join(projectPath, `target/wasm32-unknown-unknown/release/${pkgName}.wasm`);
     const wasmOutputFile = path_1.default.join(projectPath, outputDir, `${pkgName}.wasm`);
     try {
-        child_process_1.execSync(`cargo build --release --target=wasm32-unknown-unknown --no-default-features`, {
+        (0, child_process_1.execSync)(`cargo build --release --target=wasm32-unknown-unknown --no-default-features`, {
             cwd: projectPath,
             env: Object.assign(Object.assign({}, process.env), { RUSTFLAGS }),
             stdio: "inherit",
         });
-        fs_1.copyFileSync(wasmTarget, wasmOutputFile);
+        (0, fs_1.copyFileSync)(wasmTarget, wasmOutputFile);
         return wasmOutputFile;
     }
     catch (error) {

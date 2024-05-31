@@ -21,26 +21,26 @@ describe("Artifact Utils", () => {
     });
     it("getArtifactPath returns correct path", () => {
         sinon_1.default.stub(fs_1.default, "existsSync").returns(true);
-        const result = utils_1.getArtifactPath(interfacePath, artifactsPath);
-        chai_1.expect(result).to.equal(artifactPath);
-        chai_1.expect(fs_1.default.existsSync).to.have.been.calledWith(artifactPath);
+        const result = (0, utils_1.getArtifactPath)(interfacePath, artifactsPath);
+        (0, chai_1.expect)(result).to.equal(artifactPath);
+        (0, chai_1.expect)(fs_1.default.existsSync).to.have.been.calledWith(artifactPath);
     });
     it("getArtifactPath throws error if file does not exist", () => {
         sinon_1.default.stub(fs_1.default, "existsSync").returns(false);
-        chai_1.expect(() => utils_1.getArtifactPath(interfacePath, artifactsPath)).to.throw(`ABI file not found at ${artifactPath}`);
+        (0, chai_1.expect)(() => (0, utils_1.getArtifactPath)(interfacePath, artifactsPath)).to.throw(`ABI file not found at ${artifactPath}`);
     });
     it("getInterfaceArtifact returns correct artifact", () => {
         const mockArtifact = { abi: [] };
         sinon_1.default.stub(fs_1.default, "existsSync").returns(true);
         sinon_1.default.stub(fs_1.default, "readFileSync").returns(JSON.stringify(mockArtifact));
-        const result = utils_1.getInterfaceArtifact(interfacePath, artifactsPath);
-        chai_1.expect(result).to.deep.equal(mockArtifact);
-        chai_1.expect(fs_1.default.existsSync).to.have.been.calledWith(artifactPath);
-        chai_1.expect(fs_1.default.readFileSync).to.have.been.calledWith(artifactPath, "utf8");
+        const result = (0, utils_1.getInterfaceArtifact)(interfacePath, artifactsPath);
+        (0, chai_1.expect)(result).to.deep.equal(mockArtifact);
+        (0, chai_1.expect)(fs_1.default.existsSync).to.have.been.calledWith(artifactPath);
+        (0, chai_1.expect)(fs_1.default.readFileSync).to.have.been.calledWith(artifactPath, "utf8");
     });
     it("getInterfaceArtifact throws error if file does not exist", () => {
         sinon_1.default.stub(fs_1.default, "existsSync").returns(false);
-        chai_1.expect(() => utils_1.getInterfaceArtifact(interfacePath, artifactsPath)).to.throw(`ABI file not found at ${artifactPath}`);
+        (0, chai_1.expect)(() => (0, utils_1.getInterfaceArtifact)(interfacePath, artifactsPath)).to.throw(`ABI file not found at ${artifactPath}`);
     });
 });
 //# sourceMappingURL=utils.test.js.map

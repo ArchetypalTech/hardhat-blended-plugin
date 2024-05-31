@@ -9,13 +9,13 @@ import path from "path";
  */
 export function getArtifactPath(
   interfacePath: string,
-  artifactsPath: string
+  artifactsPath: string,
 ): string {
   const contractName = path.basename(interfacePath, ".sol");
   const artifactPath = path.join(
     artifactsPath,
     interfacePath,
-    `${contractName}.json`
+    `${contractName}.json`,
   );
 
   if (!fs.existsSync(artifactPath)) {
@@ -33,7 +33,7 @@ export function getArtifactPath(
  */
 export function getInterfaceArtifact(
   interfacePath: string,
-  artifactsPath: string
+  artifactsPath: string,
 ) {
   const artifactPath = getArtifactPath(interfacePath, artifactsPath);
   const artifact = JSON.parse(fs.readFileSync(artifactPath, "utf8"));

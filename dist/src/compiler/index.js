@@ -16,11 +16,11 @@ const BIN_DIR_SLUG = "bin";
  * @param pkgName - The name of the rust contract package. If the package name is "my_contract", the output file will be my_contract.wasm
  */
 function build(contractDir, pkgName) {
-    rustInstaller_1.ensureRustInstalled();
+    (0, rustInstaller_1.ensureRustInstalled)();
     const outputDir = path_1.default.join(contractDir, BIN_DIR_SLUG);
-    utils_1.rmDirSync(outputDir);
-    fs_extra_1.ensureDirSync(outputDir);
-    return wasm_1.compileRustToWasm(contractDir, BIN_DIR_SLUG, pkgName);
+    (0, utils_1.rmDirSync)(outputDir);
+    (0, fs_extra_1.ensureDirSync)(outputDir);
+    return (0, wasm_1.compileRustToWasm)(contractDir, BIN_DIR_SLUG, pkgName);
 }
 exports.build = build;
 /**
@@ -34,7 +34,7 @@ function compileAndGetBytecode(contractDir) {
     const pkgName = path_1.default.basename(contractDir).replace("-", "_");
     try {
         const wasmOutputFile = build(contractDir, pkgName);
-        return utils_1.getBytecode(path_1.default.join(wasmOutputFile));
+        return (0, utils_1.getBytecode)(path_1.default.join(wasmOutputFile));
     }
     catch (error) {
         console.error("Failed to compile Rust project.");

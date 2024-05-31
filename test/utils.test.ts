@@ -16,7 +16,7 @@ describe("Artifact Utils", () => {
     artifactsPath,
     "contracts",
     "LibInterface/IAAAA/IBBBB/IBBBB.sol",
-    `${contractName}.json`
+    `${contractName}.json`,
   );
 
   beforeEach(() => {
@@ -36,7 +36,7 @@ describe("Artifact Utils", () => {
     sinon.stub(fs, "existsSync").returns(false);
 
     expect(() => getArtifactPath(interfacePath, artifactsPath)).to.throw(
-      `ABI file not found at ${artifactPath}`
+      `ABI file not found at ${artifactPath}`,
     );
   });
 
@@ -56,7 +56,7 @@ describe("Artifact Utils", () => {
     sinon.stub(fs, "existsSync").returns(false);
 
     expect(() => getInterfaceArtifact(interfacePath, artifactsPath)).to.throw(
-      `ABI file not found at ${artifactPath}`
+      `ABI file not found at ${artifactPath}`,
     );
   });
 });

@@ -18,10 +18,10 @@ const WASM_FORMAT = "hh-wasm-artifact-1";
 function compileContract(cfg, hre) {
     const outputDir = path_1.default.join(hre.config.paths.artifacts, cfg.contractDir);
     // Get the interface artifact
-    const interfaceArtifact = utils_1.getInterfaceArtifact(cfg.interfacePath, hre.config.paths.artifacts);
+    const interfaceArtifact = (0, utils_1.getInterfaceArtifact)(cfg.interfacePath, hre.config.paths.artifacts);
     const contractName = path_1.default.basename(cfg.contractDir);
     // Compile the Rust project
-    const bytecode = compiler_1.compileAndGetBytecode(path_1.default.join(hre.config.paths.root, cfg.contractDir));
+    const bytecode = (0, compiler_1.compileAndGetBytecode)(path_1.default.join(hre.config.paths.root, cfg.contractDir));
     const artifact = {
         _format: WASM_FORMAT,
         contractName: contractName,
@@ -34,18 +34,19 @@ function compileContract(cfg, hre) {
         deployedLinkReferences: {},
     };
     // Save artifact to the output directory
-    fs_extra_1.ensureDirSync(outputDir);
+    (0, fs_extra_1.ensureDirSync)(outputDir);
     const artifactPath = path_1.default.join(outputDir, `${contractName}.json`);
     fs_1.default.writeFileSync(artifactPath, JSON.stringify(artifact, null, 2));
 }
-config_1.extendConfig((config, userConfig) => {
+(0, config_1.extendConfig)((config, userConfig) => {
     var _a, _b;
-    config.compileToWasmConfig = (_b = (_a = userConfig.compileToWasmConfig) === null || _a === void 0 ? void 0 : _a.map((cfg) => ({
-        contractDir: cfg.contractDir,
-        interfacePath: cfg.interfacePath,
-    }))) !== null && _b !== void 0 ? _b : [];
+    config.compileToWasmConfig =
+        (_b = (_a = userConfig.compileToWasmConfig) === null || _a === void 0 ? void 0 : _a.map((cfg) => ({
+            contractDir: cfg.contractDir,
+            interfacePath: cfg.interfacePath,
+        }))) !== null && _b !== void 0 ? _b : [];
 });
-config_1.subtask("compile-to-wasm", `Compiles the Rust project to WASM and save artifacts.
+(0, config_1.subtask)("compile-to-wasm", `Compiles the Rust project to WASM and save artifacts.
 
 Configuration:
   To use this plugin, you need to add a compileToWasmConfig section in your Hardhat config. Here is an example:
@@ -70,7 +71,7 @@ Configuration:
         compileContract(cfg, hre);
     }
 });
-config_1.task("compile", "Compiles the entire project, including Rust").setAction(async (_, hre, runSuper) => {
+(0, config_1.task)("compile", "Compiles the entire project, including Rust").setAction(async (_, hre, runSuper) => {
     await runSuper();
     await hre.run("compile-to-wasm");
 });
