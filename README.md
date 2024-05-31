@@ -51,7 +51,7 @@ This plugin extends the `HardhatUserConfig` with an optional `compileToWasmConfi
 
 Each configuration object should have the following fields:
 
-- `contractDir`: The relative path to the Rust contract directory from the project root. For example, `"contracts/my_contract"`.
+- `contractDir`: The relative path to the Rust contract directory from the project root. For example, `"contracts/my_contract"`. Keep in mind that the Rust contract directory should contain a `Cargo.toml` file. And contract name should be the same as the rust package name in the `Cargo.toml` file.
 - `interfacePath`: The relative path to the Solidity interface that corresponds to the Rust contract. For example, `"contracts/IMyContract.sol"`.
 
 Here is an example of how to set it:
