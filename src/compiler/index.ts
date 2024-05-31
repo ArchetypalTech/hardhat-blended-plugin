@@ -4,6 +4,7 @@ import { compileRustToWasm } from "./wasm";
 import { convertWasmToRwasm } from "./rwasm";
 import path from "path";
 import { getBytecode } from "./utils";
+import { ensureDirSync } from "fs-extra";
 
 /**
  * Builds the Rust project by compiling it to WebAssembly (WASM) and converting it to rWASM.
@@ -18,6 +19,7 @@ export function build(
   rwasmOutputFile: string;
 } {
   const bin = "bin";
+  ensureDirSync(path.join(contractDir, bin));
   const rwasmOutputFile = path.join(contractDir, bin, `${pkgName}.rwasm`);
 
   ensureRustInstalled();

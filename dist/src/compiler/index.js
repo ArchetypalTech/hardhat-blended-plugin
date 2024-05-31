@@ -10,6 +10,7 @@ const wasm_1 = require("./wasm");
 const rwasm_1 = require("./rwasm");
 const path_1 = __importDefault(require("path"));
 const utils_2 = require("./utils");
+const fs_extra_1 = require("fs-extra");
 /**
  * Builds the Rust project by compiling it to WebAssembly (WASM) and converting it to rWASM.
  * @param contractDir - The absolute path to the contract directory containing the Rust project.
@@ -17,6 +18,7 @@ const utils_2 = require("./utils");
  */
 function build(contractDir, pkgName) {
     const bin = "bin";
+    fs_extra_1.ensureDirSync(path_1.default.join(contractDir, bin));
     const rwasmOutputFile = path_1.default.join(contractDir, bin, `${pkgName}.rwasm`);
     rustInstaller_1.ensureRustInstalled();
     utils_1.prepareOutputDir(bin);
