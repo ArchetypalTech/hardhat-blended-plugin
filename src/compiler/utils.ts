@@ -1,16 +1,10 @@
 import { execSync } from "child_process";
 import fs from "fs";
-import path from "path";
 
 export function rmDirSync(dirPath: string) {
   if (fs.existsSync(dirPath)) {
     execSync(`rm -rf ${dirPath}`);
   }
-}
-
-export function prepareOutputDir(outputDir: string) {
-  rmDirSync(outputDir);
-  fs.mkdirSync(outputDir);
 }
 
 export function getBytecode(wasmPath: string): string {

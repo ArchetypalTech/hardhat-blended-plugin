@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getBytecode = exports.prepareOutputDir = exports.rmDirSync = void 0;
+exports.getBytecode = exports.rmDirSync = void 0;
 const child_process_1 = require("child_process");
 const fs_1 = __importDefault(require("fs"));
 function rmDirSync(dirPath) {
@@ -12,11 +12,6 @@ function rmDirSync(dirPath) {
     }
 }
 exports.rmDirSync = rmDirSync;
-function prepareOutputDir(outputDir) {
-    rmDirSync(outputDir);
-    fs_1.default.mkdirSync(outputDir);
-}
-exports.prepareOutputDir = prepareOutputDir;
 function getBytecode(wasmPath) {
     if (!fs_1.default.existsSync(wasmPath)) {
         throw new Error(`Bytecode file not found at ${wasmPath}`);

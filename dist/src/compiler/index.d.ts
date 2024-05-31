@@ -1,12 +1,9 @@
 /**
- * Builds the Rust project by compiling it to WebAssembly (WASM) and converting it to rWASM.
+ * Builds the Rust project by compiling it to WebAssembly (WASM) and returns wasm file path.
  * @param contractDir - The absolute path to the contract directory containing the Rust project.
- * @param pkgName - The name of the rust contract package. If the package name is "my_contract", the output files will be my_contract.wasm and my_contract.rwasm.
+ * @param pkgName - The name of the rust contract package. If the package name is "my_contract", the output file will be my_contract.wasm
  */
-export declare function build(contractDir: string, pkgName: string): {
-    wasmOutputFile: string;
-    rwasmOutputFile: string;
-};
+export declare function build(contractDir: string, pkgName: string): string;
 /**
  * Compiles the Rust project located at the specified directory and returns the bytecode.
  *

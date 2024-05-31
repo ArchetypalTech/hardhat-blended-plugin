@@ -4,27 +4,23 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.compileAndGetBytecode = exports.build = void 0;
+const fs_extra_1 = require("fs-extra");
+const path_1 = __importDefault(require("path"));
 const rustInstaller_1 = require("./rustInstaller");
 const utils_1 = require("./utils");
 const wasm_1 = require("./wasm");
-const rwasm_1 = require("./rwasm");
-const path_1 = __importDefault(require("path"));
-const utils_2 = require("./utils");
-const fs_extra_1 = require("fs-extra");
+const BIN_DIR_SLUG = "bin";
 /**
- * Builds the Rust project by compiling it to WebAssembly (WASM) and converting it to rWASM.
+ * Builds the Rust project by compiling it to WebAssembly (WASM) and returns wasm file path.
  * @param contractDir - The absolute path to the contract directory containing the Rust project.
- * @param pkgName - The name of the rust contract package. If the package name is "my_contract", the output files will be my_contract.wasm and my_contract.rwasm.
+ * @param pkgName - The name of the rust contract package. If the package name is "my_contract", the output file will be my_contract.wasm
  */
 function build(contractDir, pkgName) {
-    const bin = "bin";
-    fs_extra_1.ensureDirSync(path_1.default.join(contractDir, bin));
-    const rwasmOutputFile = path_1.default.join(contractDir, bin, `${pkgName}.rwasm`);
     rustInstaller_1.ensureRustInstalled();
-    utils_1.prepareOutputDir(bin);
-    const wasmOutputFile = wasm_1.compileRustToWasm(contractDir, bin, pkgName);
-    rwasm_1.convertWasmToRwasm(wasmOutputFile, rwasmOutputFile);
-    return { wasmOutputFile, rwasmOutputFile };
+    const outputDir = path_1.default.join(contractDir, BIN_DIR_SLUG);
+    utils_1.rmDirSync(outputDir);
+    fs_extra_1.ensureDirSync(outputDir);
+    return wasm_1.compileRustToWasm(contractDir, BIN_DIR_SLUG, pkgName);
 }
 exports.build = build;
 /**
@@ -37,8 +33,8 @@ exports.build = build;
 function compileAndGetBytecode(contractDir) {
     const pkgName = path_1.default.basename(contractDir).replace("-", "_");
     try {
-        const { wasmOutputFile } = build(contractDir, pkgName);
-        return utils_2.getBytecode(path_1.default.join(wasmOutputFile));
+        const wasmOutputFile = build(contractDir, pkgName);
+        return utils_1.getBytecode(path_1.default.join(wasmOutputFile));
     }
     catch (error) {
         console.error("Failed to compile Rust project.");

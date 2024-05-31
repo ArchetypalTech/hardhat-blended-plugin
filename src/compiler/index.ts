@@ -1,34 +1,24 @@
-import { ensureRustInstalled } from "./rustInstaller";
-import { prepareOutputDir } from "./utils";
-import { compileRustToWasm } from "./wasm";
-import { convertWasmToRwasm } from "./rwasm";
-import path from "path";
-import { getBytecode } from "./utils";
 import { ensureDirSync } from "fs-extra";
+import path from "path";
+import { ensureRustInstalled } from "./rustInstaller";
+import { getBytecode, rmDirSync } from "./utils";
+import { compileRustToWasm } from "./wasm";
+
+const BIN_DIR_SLUG = "bin";
 
 /**
- * Builds the Rust project by compiling it to WebAssembly (WASM) and converting it to rWASM.
+ * Builds the Rust project by compiling it to WebAssembly (WASM) and returns wasm file path.
  * @param contractDir - The absolute path to the contract directory containing the Rust project.
- * @param pkgName - The name of the rust contract package. If the package name is "my_contract", the output files will be my_contract.wasm and my_contract.rwasm.
+ * @param pkgName - The name of the rust contract package. If the package name is "my_contract", the output file will be my_contract.wasm
  */
-export function build(
-  contractDir: string,
-  pkgName: string
-): {
-  wasmOutputFile: string;
-  rwasmOutputFile: string;
-} {
-  const bin = "bin";
-  ensureDirSync(path.join(contractDir, bin));
-  const rwasmOutputFile = path.join(contractDir, bin, `${pkgName}.rwasm`);
-
+export function build(contractDir: string, pkgName: string): string {
   ensureRustInstalled();
-  prepareOutputDir(bin);
 
-  const wasmOutputFile = compileRustToWasm(contractDir, bin, pkgName);
-  convertWasmToRwasm(wasmOutputFile, rwasmOutputFile);
+  const outputDir = path.join(contractDir, BIN_DIR_SLUG);
+  rmDirSync(outputDir);
+  ensureDirSync(outputDir);
 
-  return { wasmOutputFile, rwasmOutputFile };
+  return compileRustToWasm(contractDir, BIN_DIR_SLUG, pkgName);
 }
 
 /**
@@ -41,7 +31,7 @@ export function build(
 export function compileAndGetBytecode(contractDir: string): string {
   const pkgName = path.basename(contractDir).replace("-", "_");
   try {
-    const { wasmOutputFile } = build(contractDir, pkgName);
+    const wasmOutputFile = build(contractDir, pkgName);
 
     return getBytecode(path.join(wasmOutputFile));
   } catch (error) {
