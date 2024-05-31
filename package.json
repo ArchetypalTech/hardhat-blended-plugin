@@ -1,9 +1,9 @@
 {
-  "name": "hardhat-compile-to-wasm",
-  "version": "0.0.1",
-  "description": "Hardhat TypeScript plugin boilerplate",
+  "name": "@fluentxyz/hardhat-compile-to-wasm",
+  "version": "0.1.0",
+  "description": "A Hardhat plugin to compile Rust contracts to WebAssembly (WASM) and generate Hardhat artifacts.",
   "repository": "github:fluentlabs-xyz/hardhat-compile-to-wasm",
-  "author": "Fluent",
+  "author": "Fluent labs",
   "license": "MIT",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
