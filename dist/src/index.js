@@ -45,7 +45,25 @@ config_1.extendConfig((config, userConfig) => {
         interfacePath: cfg.interfacePath,
     }))) !== null && _b !== void 0 ? _b : [];
 });
-config_1.subtask("compile-to-wasm", "Compiles the Rust project").setAction(async (_, hre) => {
+config_1.subtask("compile-to-wasm", `Compiles the Rust project to WASM and save artifacts.
+
+Configuration:
+  To use this plugin, you need to add a compileToWasmConfig section in your Hardhat config. Here is an example:
+
+  module.exports = {
+    ...,
+    compileToWasmConfig: [
+      {
+        contractDir: "contracts/my_rust_contract", // The relative path to the Rust contract directory from the project root
+        interfacePath: "contracts/IMyContract.sol" // The relative path to the Solidity interface that corresponds to the Rust contract
+      }
+    ],
+    ...
+  };
+
+  Fields:
+    - contractDir: The relative path to the Rust contract directory from the project root. For example, "contracts/my_rust_contract".
+    - interfacePath: The relative path to the Solidity interface that corresponds to the Rust contract. For example, "contracts/IMyContract.sol`).setAction(async (_, hre) => {
     console.log("Compiling Rust contracts...");
     const compileConfigs = hre.config.compileToWasmConfig;
     for (const cfg of compileConfigs) {

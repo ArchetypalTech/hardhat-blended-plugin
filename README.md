@@ -1,58 +1,106 @@
-# Hardhat TypeScript plugin boilerplate
+# hardhat-compile-to-wasm
 
-This is a sample Hardhat plugin written in TypeScript. Creating a Hardhat plugin
-can be as easy as extracting a part of your config into a different file and
-publishing it to npm.
+_A Hardhat plugin to compile Rust contracts to WebAssembly (WASM) and generate Hardhat artifacts._
 
-This sample project contains an example on how to do that, but also comes with
-many more features:
+## What
 
-- A mocha test suite ready to use
-- TravisCI already setup
-- A package.json with scripts and publishing info
-- Examples on how to do different things
+This plugin simplifies the process of compiling Rust contracts to WebAssembly (WASM) and generating corresponding Hardhat artifacts, allowing seamless integration of Rust-based smart contracts in your Hardhat project. As simple as running `npx hardhat compile`, this plugin will compile your Solidity contracts as usual and automatically compile your Rust contracts to WASM, generating the corresponding artifacts in the Hardhat artifacts directory.
 
 ## Installation
 
-To start working on your project, just run
+Follow these steps to install the plugin:
 
 ```bash
-npm install
+npm install hardhat-compile-to-wasm
 ```
 
-## Plugin development
+Import the plugin in your `hardhat.config.js`:
 
-Make sure to read our [Plugin Development Guide](https://hardhat.org/advanced/building-plugins.html) to learn how to build a plugin.
+```js
+require("hardhat-compile-to-wasm");
+```
 
-## Testing
+Or if you are using TypeScript, in your `hardhat.config.ts`:
 
-Running `npm run test` will run every test located in the `test/` folder. They
-use [mocha](https://mochajs.org) and [chai](https://www.chaijs.com/),
-but you can customize them.
+```ts
+import "hardhat-compile-to-wasm";
+```
 
-We recommend creating unit tests for your own modules, and integration tests for
-the interaction of the plugin with Hardhat and its dependencies.
+## Required plugins
 
-## Linting and autoformat
+This plugin requires the following Hardhat plugins:
 
-All of Hardhat projects use [prettier](https://prettier.io/) and
-[tslint](https://palantir.github.io/tslint/).
+- [@nomiclabs/hardhat-web3](https://github.com/nomiclabs/hardhat/tree/master/packages/hardhat-web3)
 
-You can check if your code style is correct by running `npm run lint`, and fix
-it with `npm run lint:fix`.
+## Tasks
 
-## Building the project
+This plugin adds the `compile-to-wasm` subtask and extends the `compile` task to include Rust contracts compilation:
 
-Just run `npm run build` ️👷
+- **compile-to-wasm**: Compiles the Rust contracts to WebAssembly and generates Hardhat artifacts.
 
-## README file
+To see the help run:
+`npx hardhat help compile-to-wasm`;
 
-This README describes this boilerplate project, but won't be very useful to your
-plugin users.
+## Environment extensions
 
-Take a look at `README-TEMPLATE.md` for an example of what a Hardhat plugin's
-README should look like.
+This plugin does not extend the Hardhat Runtime Environment.
 
-## Migrating from Buidler?
+## Configuration
 
-Take a look at [the migration guide](MIGRATION.md)!
+This plugin extends the `HardhatUserConfig` with an optional `compileToWasmConfig` field, which is an array of objects, each representing a contract compile configuration.
+
+Each configuration object should have the following fields:
+
+- `contractDir`: The relative path to the Rust contract directory from the project root. For example, `"contracts/my_contract"`.
+- `interfacePath`: The relative path to the Solidity interface that corresponds to the Rust contract. For example, `"contracts/IMyContract.sol"`.
+
+Here is an example of how to set it:
+
+```ts
+import { HardhatUserConfig } from "hardhat/config";
+import "hardhat-compile-to-wasm";
+
+const config: HardhatUserConfig = {
+  compileToWasmConfig: [
+    {
+      contractDir: "./contracts/rust/contract",
+      interfacePath: "./contracts/IRustContract.sol",
+    },
+  ],
+};
+
+export default config;
+```
+
+## Usage
+
+To use this plugin, simply run the compile task, and it will automatically compile your Rust contracts to WASM and generate the corresponding artifacts:
+
+```bash
+npx hardhat compile
+```
+
+The plugin will look for the `compileToWasmConfig` field in your `hardhat.config.js` or `hardhat.config.ts` and compile the specified Rust contracts, generating artifacts in the Hardhat artifacts directory.
+
+### Example Usage
+
+Here is an example of a `hardhat.config.ts` that includes the plugin configuration:
+
+```ts
+import { HardhatUserConfig } from "hardhat/types";
+import "hardhat-compile-to-wasm";
+
+const config: HardhatUserConfig = {
+  solidity: "0.8.4",
+  compileToWasmConfig: [
+    {
+      contractDir: "contracts/my_contract",
+      interfacePath: "contracts/IMyContract.sol"
+    }
+  ]
+};
+
+export default config;
+```
+
+This configuration will ensure that your Rust contracts are compiled to WASM and the corresponding artifacts are generated whenever you run `npx hardhat compile`.
