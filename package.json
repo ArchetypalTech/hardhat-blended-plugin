@@ -1,7 +1,7 @@
 {
   "name": "@fluentxyz/hardhat-compile-to-wasm",
-  "version": "0.1.0",
-  "description":"Hardhat plugin for seamless compilation of Rust contracts to WebAssembly (WASM), with integrated testing support for both Rust and Solidity. Part of the Fluent blockchain ecosystem.",
+  "version": "0.2.0",
+  "description": "Hardhat plugin for seamless compilation of Rust contracts to WebAssembly (WASM), with integrated testing support for both Rust and Solidity. Part of the Fluent blockchain ecosystem.",
   "repository": "github:fluentlabs-xyz/hardhat-compile-to-wasm",
   "author": "Fluent Labs",
   "license": "MIT",
