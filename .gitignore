@@ -17,3 +17,8 @@ node_modules
 ignition/deployments/chain-31337
 
 target
+
+# dev private notes
+dev.md
+
+dist

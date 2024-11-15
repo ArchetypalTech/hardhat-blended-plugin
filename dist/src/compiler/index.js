@@ -3,13 +3,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.compileAndGetBytecode = exports.build = void 0;
+exports.build = build;
+exports.compileAndGetBytecode = compileAndGetBytecode;
 const fs_extra_1 = require("fs-extra");
 const path_1 = __importDefault(require("path"));
 const rustInstaller_1 = require("./rustInstaller");
 const utils_1 = require("./utils");
 const wasm_1 = require("./wasm");
-const BIN_DIR_SLUG = "bin";
+const BIN_DIR_SLUG = 'bin';
 /**
  * Builds the Rust project by compiling it to WebAssembly (WASM) and returns wasm file path.
  * @param contractDir - The absolute path to the contract directory containing the Rust project.
@@ -22,7 +23,6 @@ function build(contractDir, pkgName) {
     (0, fs_extra_1.ensureDirSync)(outputDir);
     return (0, wasm_1.compileRustToWasm)(contractDir, BIN_DIR_SLUG, pkgName);
 }
-exports.build = build;
 /**
  * Compiles the Rust project located at the specified directory and returns the bytecode.
  *
@@ -31,15 +31,14 @@ exports.build = build;
  * @throws If there is an error during the compilation process.
  */
 function compileAndGetBytecode(contractDir) {
-    const pkgName = path_1.default.basename(contractDir).replace("-", "_");
+    const pkgName = path_1.default.basename(contractDir).replace('-', '_');
     try {
         const wasmOutputFile = build(contractDir, pkgName);
         return (0, utils_1.getBytecode)(path_1.default.join(wasmOutputFile));
     }
     catch (error) {
-        console.error("Failed to compile Rust project.");
+        console.error('Failed to compile Rust project.');
         throw error;
     }
 }
-exports.compileAndGetBytecode = compileAndGetBytecode;
 //# sourceMappingURL=index.js.map
