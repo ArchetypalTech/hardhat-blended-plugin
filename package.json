@@ -1,10 +1,14 @@
 {
   "name": "@fluentxyz/hardhat-compile-to-wasm",
   "version": "0.1.0",
-  "description": "A Hardhat plugin to compile Rust contracts to WebAssembly (WASM) and generate Hardhat artifacts.",
+  "description":"Hardhat plugin for seamless compilation of Rust contracts to WebAssembly (WASM), with integrated testing support for both Rust and Solidity. Part of the Fluent blockchain ecosystem.",
   "repository": "github:fluentlabs-xyz/hardhat-compile-to-wasm",
-  "author": "Fluent labs",
+  "author": "Fluent Labs",
   "license": "MIT",
+  "engines": {
+    "node": ">=10",
+    "pnpm": ">=3"
+  },
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "keywords": [
@@ -18,39 +22,48 @@
     "compile"
   ],
   "scripts": {
-    "lint:fix": "prettier --write 'src/**/*.{js,ts}' 'test/**/*.{js,ts}' && tslint --fix --config tslint.json --project tsconfig.json",
-    "lint": "tslint --config tslint.json --project tsconfig.json",
-    "test": "mocha --config mocha.config.js",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix && prettier --write 'src/**/*.{js,ts}' 'test/**/*.{js,ts}'",
+    "format": "prettier --write 'src/**/*.ts' 'test/**/*.ts'",
+    "test": "mocha",
+    "test:fixtures": "cd test/fixtures/basic && pnpm test",
+    "test:all": "pnpm test && pnpm test:fixtures",
     "build": "tsc",
     "watch": "tsc -w",
-    "prepublishOnly": "npm run build"
+    "clean": "rm -rf node_modules dist",
+    "prepare": "pnpm run build",
+    "preversion": "pnpm run test:all",
+    "version:patch": "npm version patch",
+    "version:minor": "npm version minor",
+    "version:major": "npm version major",
+    "postversion": "git push && git push --tags",
+    "release": "pnpm run test:all && pnpm run build"
   },
-  "files": [
-    "dist/src/",
-    "src/",
-    "LICENSE",
-    "README.md"
-  ],
   "devDependencies": {
     "@types/chai": "^4.3.16",
-    "@types/fs-extra": "^5.0.4",
-    "@types/mocha": "^5.2.7",
-    "@types/node": "^8.10.38",
-    "@types/sinon": "^17.0.3",
+    "@types/fs-extra": "11.0.4",
+    "@types/mocha": "^10.0.9",
+    "@types/node": "22.9.0",
+    "@types/sinon": "17.0.3",
     "@types/sinon-chai": "^3.2.12",
+    "@typescript-eslint/eslint-plugin": "^8.14.0",
+    "@typescript-eslint/parser": "^8.14.0",
     "chai": "^4.2.0",
-    "hardhat": "^2.0.0",
-    "mocha": "^10.4.0",
-    "prettier": "2.0.5",
+    "chalk": "^4.1.2",
+    "eslint": "^9.14.0",
+    "eslint-config-prettier": "^9.1.0",
+    "fs-extra": "11.2.0",
+    "hardhat": "^2.22.15",
+    "mocha": "11.0.0",
+    "prettier": "^3.3.3",
     "sinon": "^18.0.0",
     "sinon-chai": "^3.7.0",
-    "ts-node": "^8.10.2",
-    "tslint": "^5.16.0",
-    "tslint-config-prettier": "^1.18.0",
-    "tslint-plugin-prettier": "^2.0.1",
-    "typescript": "^4.0.3"
+    "ts-node": "10.9.2",
+    "typescript": "5.6.3",
+    "@nomicfoundation/hardhat-ethers": "^3.0.0",
+    "ethers": "^6.0.0"
   },
   "peerDependencies": {
-    "hardhat": "^2.0.0"
+    "hardhat": "2.22.15"
   }
 }

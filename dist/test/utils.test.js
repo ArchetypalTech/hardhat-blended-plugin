@@ -11,35 +11,35 @@ const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const utils_1 = require("../src/utils");
 chai_2.default.use(sinon_chai_1.default);
-describe("Artifact Utils", () => {
-    const artifactsPath = "/path/to/artifacts";
-    const interfacePath = "contracts/LibInterface/IAAAA/IBBBB/IBBBB.sol";
-    const contractName = "IBBBB";
-    const artifactPath = path_1.default.join(artifactsPath, "contracts", "LibInterface/IAAAA/IBBBB/IBBBB.sol", `${contractName}.json`);
+describe('Artifact Utils', () => {
+    const artifactsPath = '/path/to/artifacts';
+    const interfacePath = 'contracts/LibInterface/IAAAA/IBBBB/IBBBB.sol';
+    const contractName = 'IBBBB';
+    const artifactPath = path_1.default.join(artifactsPath, 'contracts', 'LibInterface/IAAAA/IBBBB/IBBBB.sol', `${contractName}.json`);
     beforeEach(() => {
         sinon_1.default.restore();
     });
-    it("getArtifactPath returns correct path", () => {
-        sinon_1.default.stub(fs_1.default, "existsSync").returns(true);
+    it('getArtifactPath returns correct path', () => {
+        sinon_1.default.stub(fs_1.default, 'existsSync').returns(true);
         const result = (0, utils_1.getArtifactPath)(interfacePath, artifactsPath);
         (0, chai_1.expect)(result).to.equal(artifactPath);
         (0, chai_1.expect)(fs_1.default.existsSync).to.have.been.calledWith(artifactPath);
     });
-    it("getArtifactPath throws error if file does not exist", () => {
-        sinon_1.default.stub(fs_1.default, "existsSync").returns(false);
+    it('getArtifactPath throws error if file does not exist', () => {
+        sinon_1.default.stub(fs_1.default, 'existsSync').returns(false);
         (0, chai_1.expect)(() => (0, utils_1.getArtifactPath)(interfacePath, artifactsPath)).to.throw(`ABI file not found at ${artifactPath}`);
     });
-    it("getInterfaceArtifact returns correct artifact", () => {
+    it('getInterfaceArtifact returns correct artifact', () => {
         const mockArtifact = { abi: [] };
-        sinon_1.default.stub(fs_1.default, "existsSync").returns(true);
-        sinon_1.default.stub(fs_1.default, "readFileSync").returns(JSON.stringify(mockArtifact));
+        sinon_1.default.stub(fs_1.default, 'existsSync').returns(true);
+        sinon_1.default.stub(fs_1.default, 'readFileSync').returns(JSON.stringify(mockArtifact));
         const result = (0, utils_1.getInterfaceArtifact)(interfacePath, artifactsPath);
         (0, chai_1.expect)(result).to.deep.equal(mockArtifact);
         (0, chai_1.expect)(fs_1.default.existsSync).to.have.been.calledWith(artifactPath);
-        (0, chai_1.expect)(fs_1.default.readFileSync).to.have.been.calledWith(artifactPath, "utf8");
+        (0, chai_1.expect)(fs_1.default.readFileSync).to.have.been.calledWith(artifactPath, 'utf8');
     });
-    it("getInterfaceArtifact throws error if file does not exist", () => {
-        sinon_1.default.stub(fs_1.default, "existsSync").returns(false);
+    it('getInterfaceArtifact throws error if file does not exist', () => {
+        sinon_1.default.stub(fs_1.default, 'existsSync').returns(false);
         (0, chai_1.expect)(() => (0, utils_1.getInterfaceArtifact)(interfacePath, artifactsPath)).to.throw(`ABI file not found at ${artifactPath}`);
     });
 });

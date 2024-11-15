@@ -1,5 +1,5 @@
-import { execSync } from "child_process";
-import fs from "fs";
+import { execSync } from 'child_process';
+import fs from 'fs';
 
 export function rmDirSync(dirPath: string) {
   if (fs.existsSync(dirPath)) {
@@ -14,5 +14,5 @@ export function getBytecode(wasmPath: string): string {
 
   const wasmBinary = fs.readFileSync(wasmPath);
 
-  return `0x${wasmBinary.toString("hex")}`;
+  return `0x${wasmBinary.toString('hex')}`;
 }

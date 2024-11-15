@@ -1,14 +1,3 @@
-declare module "hardhat/types/config" {
-    interface ContractCompileConfig {
-        contractDir: string;
-        interfacePath: string;
-    }
-    interface HardhatUserConfig {
-        compileToWasmConfig?: ContractCompileConfig[];
-    }
-    interface HardhatConfig {
-        compileToWasmConfig: ContractCompileConfig[];
-    }
-}
-export {};
+import '@nomicfoundation/hardhat-ethers';
+import './type-extension';
 //# sourceMappingURL=index.d.ts.map

@@ -1,10 +1,10 @@
-import { ensureDirSync } from "fs-extra";
-import path from "path";
-import { ensureRustInstalled } from "./rustInstaller";
-import { getBytecode, rmDirSync } from "./utils";
-import { compileRustToWasm } from "./wasm";
+import { ensureDirSync } from 'fs-extra';
+import path from 'path';
+import { ensureRustInstalled } from './rustInstaller';
+import { getBytecode, rmDirSync } from './utils';
+import { compileRustToWasm } from './wasm';
 
-const BIN_DIR_SLUG = "bin";
+const BIN_DIR_SLUG = 'bin';
 
 /**
  * Builds the Rust project by compiling it to WebAssembly (WASM) and returns wasm file path.
@@ -29,13 +29,13 @@ export function build(contractDir: string, pkgName: string): string {
  * @throws If there is an error during the compilation process.
  */
 export function compileAndGetBytecode(contractDir: string): string {
-  const pkgName = path.basename(contractDir).replace("-", "_");
+  const pkgName = path.basename(contractDir).replace('-', '_');
   try {
     const wasmOutputFile = build(contractDir, pkgName);
 
     return getBytecode(path.join(wasmOutputFile));
   } catch (error) {
-    console.error("Failed to compile Rust project.");
+    console.error('Failed to compile Rust project.');
     throw error;
   }
 }
