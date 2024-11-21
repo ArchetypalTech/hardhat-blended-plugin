@@ -36,7 +36,6 @@
     "version:patch": "pnpm version patch",
     "version:minor": "pnpm version minor",
     "version:major": "pnpm version major",
-    "postversion": "git push && git push --tags",
     "release": "pnpm run test:all && pnpm run build"
   },
   "devDependencies": {
