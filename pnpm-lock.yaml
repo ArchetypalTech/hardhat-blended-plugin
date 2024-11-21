@@ -77,7 +77,7 @@ importers:
 
   test/fixtures/basic:
     dependencies:
-      '@fluentxyz/hardhat-compile-to-wasm':
+      '@fluent.xyz/hardhat-plugin':
         specifier: workspace:*
         version: link:../../..
       hardhat:

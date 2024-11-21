@@ -1,6 +1,6 @@
 import { HardhatUserConfig } from 'hardhat/types';
 import '@nomicfoundation/hardhat-toolbox';
-import '@fluentxyz/hardhat-compile-to-wasm';
+import '@fluent.xyz/hardhat-plugin';
 
 require('dotenv').config();
 

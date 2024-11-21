@@ -15,22 +15,22 @@ This plugin streamlines the development of WASM smart contracts by:
 
 ```bash
 # npm
-npm install @fluentxyz/hardhat-compile-to-wasm
+npm install @fluent.xyz/hardhat-plugin
 
 # pnpm
-pnpm add @fluentxyz/hardhat-compile-to-wasm
+pnpm add @fluent.xyz/hardhat-plugin
 ```
 
 Import the plugin in your `hardhat.config.js`:
 
 ```js
-require("@fluentxyz/hardhat-compile-to-wasm");
+require("@fluent.xyz/hardhat-plugin");
 ```
 
 Or if you are using TypeScript, in your `hardhat.config.ts`:
 
 ```ts
-import "@fluentxyz/hardhat-compile-to-wasm";
+import "@fluent.xyz/hardhat-plugin";
 ```
 
 ## Tasks
@@ -75,7 +75,7 @@ Example configuration:
 
 ```typescript
 import { HardhatUserConfig } from "hardhat/config";
-import "@fluentxyz/hardhat-compile-to-wasm";
+import "@fluent.xyz/hardhat-plugin";
 import "@nomicfoundation/hardhat-ethers";
 
 const config: HardhatUserConfig = {
