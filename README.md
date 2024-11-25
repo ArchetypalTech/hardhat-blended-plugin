@@ -1,4 +1,4 @@
-# hardhat-compile-to-wasm
+# hardhat-plugin
 
 _A Hardhat plugin for seamless compilation and testing of Rust contracts to WebAssembly (WASM) in the Fluent blockchain ecosystem._
 

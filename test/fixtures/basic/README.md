@@ -1,6 +1,6 @@
 # Basic WASM Contract Example
 
-A minimal example project showcasing WASM smart contract development with Hardhat and Fluent blockchain, using the `hardhat-compile-to-wasm` plugin.
+A minimal example project showcasing WASM smart contract development with Hardhat and Fluent blockchain, using the `hardhat-plugin` plugin.
 
 ## Project Structure
 
