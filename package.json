@@ -3,7 +3,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Hardhat toolbox for developing smart contracts in the Fluent blockchain ecosystem. Provides seamless WASM compilation and integrated testing for Rust and Solidity contracts.",
   "repository": "github:fluentlabs-xyz/hardhat-plugin",
   "author": "Fluent Labs",
