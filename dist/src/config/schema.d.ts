@@ -88,17 +88,85 @@ declare const NodeSettingsSchema: z.ZodObject<{
         httpPort: number;
     };
 }>;
-declare const ContractConfigSchema: z.ZodObject<{
+declare const UserContractConfigSchema: z.ZodObject<{
     path: z.ZodString;
     interface: z.ZodObject<{
-        name: z.ZodString;
         path: z.ZodString;
     }, "strip", z.ZodTypeAny, {
         path: string;
-        name: string;
     }, {
         path: string;
-        name: string;
+    }>;
+    compile: z.ZodOptional<z.ZodObject<{
+        target: z.ZodString;
+        debug: z.ZodBoolean;
+        options: z.ZodArray<z.ZodString, "many">;
+    }, "strip", z.ZodTypeAny, {
+        target: string;
+        debug: boolean;
+        options: string[];
+    }, {
+        target: string;
+        debug: boolean;
+        options: string[];
+    }>>;
+    test: z.ZodOptional<z.ZodObject<{
+        command: z.ZodString;
+        options: z.ZodArray<z.ZodString, "many">;
+        timeout: z.ZodNumber;
+        retries: z.ZodNumber;
+    }, "strip", z.ZodTypeAny, {
+        timeout: number;
+        retries: number;
+        options: string[];
+        command: string;
+    }, {
+        timeout: number;
+        retries: number;
+        options: string[];
+        command: string;
+    }>>;
+}, "strip", z.ZodTypeAny, {
+    path: string;
+    interface: {
+        path: string;
+    };
+    test?: {
+        timeout: number;
+        retries: number;
+        options: string[];
+        command: string;
+    } | undefined;
+    compile?: {
+        target: string;
+        debug: boolean;
+        options: string[];
+    } | undefined;
+}, {
+    path: string;
+    interface: {
+        path: string;
+    };
+    test?: {
+        timeout: number;
+        retries: number;
+        options: string[];
+        command: string;
+    } | undefined;
+    compile?: {
+        target: string;
+        debug: boolean;
+        options: string[];
+    } | undefined;
+}>;
+declare const ContractConfigSchema: z.ZodObject<{
+    path: z.ZodString;
+    interface: z.ZodObject<{
+        path: z.ZodString;
+    }, "strip", z.ZodTypeAny, {
+        path: string;
+    }, {
+        path: string;
     }>;
     compile: z.ZodObject<{
         target: z.ZodString;
@@ -144,7 +212,6 @@ declare const ContractConfigSchema: z.ZodObject<{
     };
     interface: {
         path: string;
-        name: string;
     };
 }, {
     test: {
@@ -161,7 +228,6 @@ declare const ContractConfigSchema: z.ZodObject<{
     };
     interface: {
         path: string;
-        name: string;
     };
 }>;
 declare const UserConfigSchema: z.ZodObject<{
@@ -258,16 +324,13 @@ declare const UserConfigSchema: z.ZodObject<{
     contracts: z.ZodOptional<z.ZodArray<z.ZodObject<{
         path: z.ZodString;
         interface: z.ZodObject<{
-            name: z.ZodString;
             path: z.ZodString;
         }, "strip", z.ZodTypeAny, {
             path: string;
-            name: string;
         }, {
             path: string;
-            name: string;
         }>;
-        compile: z.ZodObject<{
+        compile: z.ZodOptional<z.ZodObject<{
             target: z.ZodString;
             debug: z.ZodBoolean;
             options: z.ZodArray<z.ZodString, "many">;
@@ -279,8 +342,8 @@ declare const UserConfigSchema: z.ZodObject<{
             target: string;
             debug: boolean;
             options: string[];
-        }>;
-        test: z.ZodObject<{
+        }>>;
+        test: z.ZodOptional<z.ZodObject<{
             command: z.ZodString;
             options: z.ZodArray<z.ZodString, "many">;
             timeout: z.ZodNumber;
@@ -295,41 +358,39 @@ declare const UserConfigSchema: z.ZodObject<{
             retries: number;
             options: string[];
             command: string;
-        }>;
+        }>>;
     }, "strip", z.ZodTypeAny, {
-        test: {
+        path: string;
+        interface: {
+            path: string;
+        };
+        test?: {
             timeout: number;
             retries: number;
             options: string[];
             command: string;
-        };
-        path: string;
-        compile: {
+        } | undefined;
+        compile?: {
             target: string;
             debug: boolean;
             options: string[];
-        };
-        interface: {
-            path: string;
-            name: string;
-        };
+        } | undefined;
     }, {
-        test: {
+        path: string;
+        interface: {
+            path: string;
+        };
+        test?: {
             timeout: number;
             retries: number;
             options: string[];
             command: string;
-        };
-        path: string;
-        compile: {
+        } | undefined;
+        compile?: {
             target: string;
             debug: boolean;
             options: string[];
-        };
-        interface: {
-            path: string;
-            name: string;
-        };
+        } | undefined;
     }>, "many">>;
     discovery: z.ZodOptional<z.ZodObject<{
         enabled: z.ZodOptional<z.ZodBoolean>;
@@ -352,22 +413,21 @@ declare const UserConfigSchema: z.ZodObject<{
         command: string;
     } | undefined;
     contracts?: {
-        test: {
+        path: string;
+        interface: {
+            path: string;
+        };
+        test?: {
             timeout: number;
             retries: number;
             options: string[];
             command: string;
-        };
-        path: string;
-        compile: {
+        } | undefined;
+        compile?: {
             target: string;
             debug: boolean;
             options: string[];
-        };
-        interface: {
-            path: string;
-            name: string;
-        };
+        } | undefined;
     }[] | undefined;
     compile?: {
         target: string;
@@ -402,22 +462,21 @@ declare const UserConfigSchema: z.ZodObject<{
         command: string;
     } | undefined;
     contracts?: {
-        test: {
+        path: string;
+        interface: {
+            path: string;
+        };
+        test?: {
             timeout: number;
             retries: number;
             options: string[];
             command: string;
-        };
-        path: string;
-        compile: {
+        } | undefined;
+        compile?: {
             target: string;
             debug: boolean;
             options: string[];
-        };
-        interface: {
-            path: string;
-            name: string;
-        };
+        } | undefined;
     }[] | undefined;
     compile?: {
         target: string;
@@ -539,16 +598,13 @@ export declare const FluentConfigSchema: z.ZodEffects<z.ZodObject<{
     contracts: z.ZodOptional<z.ZodArray<z.ZodObject<{
         path: z.ZodString;
         interface: z.ZodObject<{
-            name: z.ZodString;
             path: z.ZodString;
         }, "strip", z.ZodTypeAny, {
             path: string;
-            name: string;
         }, {
             path: string;
-            name: string;
         }>;
-        compile: z.ZodObject<{
+        compile: z.ZodOptional<z.ZodObject<{
             target: z.ZodString;
             debug: z.ZodBoolean;
             options: z.ZodArray<z.ZodString, "many">;
@@ -560,8 +616,8 @@ export declare const FluentConfigSchema: z.ZodEffects<z.ZodObject<{
             target: string;
             debug: boolean;
             options: string[];
-        }>;
-        test: z.ZodObject<{
+        }>>;
+        test: z.ZodOptional<z.ZodObject<{
             command: z.ZodString;
             options: z.ZodArray<z.ZodString, "many">;
             timeout: z.ZodNumber;
@@ -576,41 +632,39 @@ export declare const FluentConfigSchema: z.ZodEffects<z.ZodObject<{
             retries: number;
             options: string[];
             command: string;
-        }>;
+        }>>;
     }, "strip", z.ZodTypeAny, {
-        test: {
+        path: string;
+        interface: {
+            path: string;
+        };
+        test?: {
             timeout: number;
             retries: number;
             options: string[];
             command: string;
-        };
-        path: string;
-        compile: {
+        } | undefined;
+        compile?: {
             target: string;
             debug: boolean;
             options: string[];
-        };
-        interface: {
-            path: string;
-            name: string;
-        };
+        } | undefined;
     }, {
-        test: {
+        path: string;
+        interface: {
+            path: string;
+        };
+        test?: {
             timeout: number;
             retries: number;
             options: string[];
             command: string;
-        };
-        path: string;
-        compile: {
+        } | undefined;
+        compile?: {
             target: string;
             debug: boolean;
             options: string[];
-        };
-        interface: {
-            path: string;
-            name: string;
-        };
+        } | undefined;
     }>, "many">>;
     discovery: z.ZodOptional<z.ZodObject<{
         enabled: z.ZodOptional<z.ZodBoolean>;
@@ -633,22 +687,21 @@ export declare const FluentConfigSchema: z.ZodEffects<z.ZodObject<{
         command: string;
     } | undefined;
     contracts?: {
-        test: {
+        path: string;
+        interface: {
+            path: string;
+        };
+        test?: {
             timeout: number;
             retries: number;
             options: string[];
             command: string;
-        };
-        path: string;
-        compile: {
+        } | undefined;
+        compile?: {
             target: string;
             debug: boolean;
             options: string[];
-        };
-        interface: {
-            path: string;
-            name: string;
-        };
+        } | undefined;
     }[] | undefined;
     compile?: {
         target: string;
@@ -683,22 +736,21 @@ export declare const FluentConfigSchema: z.ZodEffects<z.ZodObject<{
         command: string;
     } | undefined;
     contracts?: {
-        test: {
+        path: string;
+        interface: {
+            path: string;
+        };
+        test?: {
             timeout: number;
             retries: number;
             options: string[];
             command: string;
-        };
-        path: string;
-        compile: {
+        } | undefined;
+        compile?: {
             target: string;
             debug: boolean;
             options: string[];
-        };
-        interface: {
-            path: string;
-            name: string;
-        };
+        } | undefined;
     }[] | undefined;
     compile?: {
         target: string;
@@ -741,9 +793,9 @@ export declare const FluentConfigSchema: z.ZodEffects<z.ZodObject<{
         path: string;
         interface: {
             path: string;
-            name: string;
         };
     }[];
+    env: Record<string, string>;
     discovery: {
         enabled: boolean;
         paths: string[];
@@ -774,9 +826,6 @@ export declare const FluentConfigSchema: z.ZodEffects<z.ZodObject<{
             httpPort: number;
         };
     };
-    env: {
-        RUST_LOG: string;
-    } | Record<string, string>;
 }, {
     test?: {
         timeout: number;
@@ -785,22 +834,21 @@ export declare const FluentConfigSchema: z.ZodEffects<z.ZodObject<{
         command: string;
     } | undefined;
     contracts?: {
-        test: {
+        path: string;
+        interface: {
+            path: string;
+        };
+        test?: {
             timeout: number;
             retries: number;
             options: string[];
             command: string;
-        };
-        path: string;
-        compile: {
+        } | undefined;
+        compile?: {
             target: string;
             debug: boolean;
             options: string[];
-        };
-        interface: {
-            path: string;
-            name: string;
-        };
+        } | undefined;
     }[] | undefined;
     compile?: {
         target: string;
@@ -829,6 +877,7 @@ export declare const FluentConfigSchema: z.ZodEffects<z.ZodObject<{
     } | undefined;
 }>;
 export type UserConfig = z.infer<typeof UserConfigSchema>;
+export type UserContractConfig = z.infer<typeof UserContractConfigSchema>;
 export type CompileSettings = z.infer<typeof CompileSettingsSchema>;
 export type TestSettings = z.infer<typeof TestSettingsSchema>;
 export type NodeSettings = z.infer<typeof NodeSettingsSchema>;

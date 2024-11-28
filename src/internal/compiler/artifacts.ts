@@ -21,6 +21,7 @@ export class ArtifactBuilder {
     config: ContractConfig,
     interfaceABI: any[],
     contractName: string,
+    interfaceName: string,
     bytecode: string,
   ): Promise<void> {
     const formattedPath = this.formatContractPath(config.path);
@@ -33,7 +34,7 @@ export class ArtifactBuilder {
       _format: COMPILER_CONSTANTS.ARTIFACTS.FORMATS.WASM,
       contractName,
       sourceName: config.path,
-      interfaceName: config.interface.name,
+      interfaceName: interfaceName,
       interfacePath: config.interface.path,
       abi: interfaceABI,
       bytecode,

@@ -39,7 +39,6 @@ const UserContractConfigSchema = z.object({
   test: TestSettingsSchema.optional(),
 });
 
-
 const ContractConfigSchema = z.object({
   path: z.string(),
   interface: z.object({

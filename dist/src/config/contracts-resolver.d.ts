@@ -1,4 +1,4 @@
-import { ContractConfig, FluentConfig } from './schema';
+import { CompileSettings, ContractConfig, TestSettings, UserConfig } from './schema';
 export declare class ContractsResolver {
     /**
      * Converts kebab-case or snake_case to PascalCase
@@ -41,6 +41,6 @@ export declare class ContractsResolver {
      * Resolves complete contract configurations.
      * Handles both explicitly configured contracts and auto-discovered ones.
      */
-    resolve(config: FluentConfig): ContractConfig[];
+    resolve(config: UserConfig, globalCompileConfig: CompileSettings, globalTestConfig: TestSettings): ContractConfig[];
 }
 //# sourceMappingURL=contracts-resolver.d.ts.map

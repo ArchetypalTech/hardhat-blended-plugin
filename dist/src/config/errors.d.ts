@@ -9,7 +9,8 @@ export declare enum ErrorCode {
     VALIDATION_ERROR = "VALIDATION_ERROR",
     UNKNOWN_ERROR = "UNKNOWN_ERROR",
     MERGE_ERROR = "MERGE_ERROR",
-    CARGO_NOT_FOUND = "CARGO_NOT_FOUND"
+    CARGO_NOT_FOUND = "CARGO_NOT_FOUND",
+    INVALID_CONFIGURATION = "INVALID_CONFIGURATION"
 }
 export declare class ConfigurationError extends Error {
     details?: string[] | undefined;

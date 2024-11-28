@@ -29,10 +29,17 @@ const NodeSettingsSchema = zod_1.z.object({
         httpPort: zod_1.z.number(),
     }),
 });
+const UserContractConfigSchema = zod_1.z.object({
+    path: zod_1.z.string(),
+    interface: zod_1.z.object({
+        path: zod_1.z.string(),
+    }),
+    compile: CompileSettingsSchema.optional(),
+    test: TestSettingsSchema.optional(),
+});
 const ContractConfigSchema = zod_1.z.object({
     path: zod_1.z.string(),
     interface: zod_1.z.object({
-        name: zod_1.z.string(),
         path: zod_1.z.string(),
     }),
     compile: CompileSettingsSchema,
@@ -44,7 +51,7 @@ const UserConfigSchema = zod_1.z.object({
     test: TestSettingsSchema.optional(),
     node: NodeSettingsSchema.optional(),
     env: zod_1.z.record(zod_1.z.string()).optional(),
-    contracts: zod_1.z.array(ContractConfigSchema).optional(),
+    contracts: zod_1.z.array(UserContractConfigSchema).optional(),
     discovery: zod_1.z
         .object({
         enabled: zod_1.z.boolean().optional(),
@@ -54,18 +61,16 @@ const UserConfigSchema = zod_1.z.object({
         .optional(),
 });
 exports.FluentConfigSchema = UserConfigSchema.transform((config) => {
-    const baseConfig = Object.assign(Object.assign(Object.assign({}, defaults_1.DEFAULT_SETTINGS), config), { discovery: Object.assign(Object.assign({}, defaults_1.DEFAULT_SETTINGS.discovery), config.discovery) });
+    const baseConfig = Object.assign(Object.assign(Object.assign({}, defaults_1.DEFAULT_SETTINGS), config), { env: Object.assign(Object.assign({}, defaults_1.DEFAULT_SETTINGS.env), (config.env || {})), discovery: Object.assign(Object.assign({}, defaults_1.DEFAULT_SETTINGS.discovery), config.discovery) });
     const resolver = new contracts_resolver_1.ContractsResolver();
     let contracts = [];
-    // If contracts are provided, use them
     if (config.contracts && config.contracts.length > 0) {
         contracts = config.contracts;
     }
-    // Otherwise, try to discover contracts
     else if (baseConfig.discovery.enabled !== false) {
-        contracts = resolver.resolve(baseConfig);
+        contracts = resolver.resolve(baseConfig, baseConfig.compile, baseConfig.test);
     }
-    // Merge contract settings with base settings
+    // Process contracts with proper inheritance
     const processedContracts = contracts.map((contract) => (Object.assign(Object.assign({}, contract), { compile: Object.assign(Object.assign({}, baseConfig.compile), contract.compile), test: Object.assign(Object.assign({}, baseConfig.test), contract.test) })));
     return Object.assign(Object.assign({}, baseConfig), { contracts: processedContracts });
 });

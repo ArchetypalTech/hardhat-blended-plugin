@@ -1,7 +1,7 @@
+import './type-extensions';
 import { extendConfig } from 'hardhat/config';
 import { HardhatConfig, HardhatUserConfig } from 'hardhat/types';
 import { FluentConfigSchema } from './config/schema';
-import './type-extensions';
 import './tasks';
 
 // Extend Hardhat's config with Fluent plugin configuration
@@ -15,3 +15,4 @@ extendConfig((config: HardhatConfig, userConfig: Readonly<HardhatUserConfig>) =>
 
 // Re-export configuration types and utilities
 export * from './config';
+export * from './type-extensions';

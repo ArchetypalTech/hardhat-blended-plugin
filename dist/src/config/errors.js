@@ -14,6 +14,7 @@ var ErrorCode;
     ErrorCode["UNKNOWN_ERROR"] = "UNKNOWN_ERROR";
     ErrorCode["MERGE_ERROR"] = "MERGE_ERROR";
     ErrorCode["CARGO_NOT_FOUND"] = "CARGO_NOT_FOUND";
+    ErrorCode["INVALID_CONFIGURATION"] = "INVALID_CONFIGURATION";
 })(ErrorCode || (exports.ErrorCode = ErrorCode = {}));
 class ConfigurationError extends Error {
     constructor(message, details, code) {

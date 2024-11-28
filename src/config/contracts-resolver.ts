@@ -1,9 +1,8 @@
-import path from 'path';
 import fs from 'fs';
 import glob from 'glob';
+import path from 'path';
 import { ConfigurationError, ErrorCode } from './errors';
-import { CompileSettings, ContractConfig, FluentConfig, TestSettings, UserConfig } from './schema';
-import { DEFAULT_SETTINGS } from './defaults';
+import { CompileSettings, ContractConfig, TestSettings, UserConfig } from './schema';
 
 /**
  * Represents basic contract information discovered during the scanning process
@@ -215,10 +214,10 @@ export class ContractsResolver {
     globalCompileConfig: CompileSettings,
     globalTestConfig: TestSettings,
   ): ContractConfig[] {
-    return discoveredContracts.map(contract => ({
+    return discoveredContracts.map((contract) => ({
       ...contract,
       compile: { ...globalCompileConfig },
-      test: { ...globalTestConfig }
+      test: { ...globalTestConfig },
     }));
   }
 
@@ -229,7 +228,7 @@ export class ContractsResolver {
   resolve(
     config: UserConfig,
     globalCompileConfig: CompileSettings,
-    globalTestConfig: TestSettings
+    globalTestConfig: TestSettings,
   ): ContractConfig[] {
     if (config.discovery?.enabled === false && !config.contracts) {
       throw new ConfigurationError(
@@ -241,9 +240,8 @@ export class ContractsResolver {
 
     let contracts: ContractConfig[] = [];
 
-
     if (config.contracts) {
-      contracts = config.contracts.map(contract => ({
+      contracts = config.contracts.map((contract) => ({
         path: this.validateContractPath(contract.path),
         interface: contract.interface,
         compile: contract.compile ?? { ...globalCompileConfig },
@@ -251,12 +249,13 @@ export class ContractsResolver {
       }));
     }
 
-    if (config.discovery?.enabled !== false) {
+    // Discover contracts if none are explicitly configured
+    if (contracts.length == 0 && config.discovery?.enabled !== false) {
       const discoveredContracts = this.discoverContracts(config);
       const discoveredConfigs = this.createContractConfigs(
         discoveredContracts,
         globalCompileConfig,
-        globalTestConfig
+        globalTestConfig,
       );
       contracts = [...contracts, ...discoveredConfigs];
     }

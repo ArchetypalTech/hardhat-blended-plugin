@@ -14,9 +14,9 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+require("./type-extensions");
 const config_1 = require("hardhat/config");
 const schema_1 = require("./config/schema");
-require("./type-extensions");
 require("./tasks");
 // Extend Hardhat's config with Fluent plugin configuration
 (0, config_1.extendConfig)((config, userConfig) => {
@@ -27,4 +27,5 @@ require("./tasks");
 });
 // Re-export configuration types and utilities
 __exportStar(require("./config"), exports);
+__exportStar(require("./type-extensions"), exports);
 //# sourceMappingURL=index.js.map

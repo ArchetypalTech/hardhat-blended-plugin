@@ -34,6 +34,10 @@ export const CompilerErrors = {
       `Expected WASM at: ${path}`,
     ]),
 
+  contractNotFound: (path: string) =>
+    new CompilerError(CompilerErrorCode.WASM_NOT_FOUND, 'Contract file not found', [
+      `Expected contract at: ${path}`,
+    ]),
   interfaceNotFound: (path: string) =>
     new CompilerError(CompilerErrorCode.INTERFACE_NOT_FOUND, 'Interface file not found', [
       `Expected interface at: ${path}`,

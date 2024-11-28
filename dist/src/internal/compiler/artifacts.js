@@ -19,7 +19,7 @@ class ArtifactBuilder {
     /**
      * Saves contract artifact and associated files
      */
-    async saveArtifact(config, interfaceABI, contractName, bytecode) {
+    async saveArtifact(config, interfaceABI, contractName, interfaceName, bytecode) {
         const formattedPath = this.formatContractPath(config.path);
         const artifactDir = path_1.default.join(this.artifactsPath, formattedPath + '.wasm');
         const artifactPath = path_1.default.join(artifactDir, `${contractName}.json`);
@@ -28,7 +28,7 @@ class ArtifactBuilder {
             _format: constants_1.COMPILER_CONSTANTS.ARTIFACTS.FORMATS.WASM,
             contractName,
             sourceName: config.path,
-            interfaceName: config.interface.name,
+            interfaceName: interfaceName,
             interfacePath: config.interface.path,
             abi: interfaceABI,
             bytecode,

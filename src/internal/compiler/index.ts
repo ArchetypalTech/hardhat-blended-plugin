@@ -33,7 +33,10 @@ export class RustCompiler {
   ): Promise<CompileResult> {
     try {
       const contractPath = path.resolve(this.hre.config.paths.root, contract.path);
+      const interfacePath = path.resolve(this.hre.config.paths.root, contract.interface.path);
+
       const contractName = path.basename(this.artifactBuilder.formatContractPath(contractPath));
+      const interfaceName = path.basename(interfacePath, path.extname(interfacePath));
 
       if (options.verbose) {
         console.log('Compiling with settings:', contract.compile);
@@ -48,9 +51,15 @@ export class RustCompiler {
       }
 
       const bytecode = this.getBytecode(wasmPath);
-      const interfaceABI = this.getInterfaceABI(contract);
+      const interfaceABI = this.getInterfaceABI(contract, interfaceName);
 
-      await this.artifactBuilder.saveArtifact(contract, interfaceABI, contractName, bytecode);
+      await this.artifactBuilder.saveArtifact(
+        contract,
+        interfaceABI,
+        contractName,
+        interfaceName,
+        bytecode,
+      );
 
       return {
         contractName,
@@ -66,7 +75,7 @@ export class RustCompiler {
     }
   }
 
-  private getInterfaceABI(contract: ContractConfig): any[] {
+  private getInterfaceABI(contract: ContractConfig, interfaceName: string): any[] {
     if (!contract.interface) {
       throw CompilerErrors.interfaceNotFound(contract.path);
     }
@@ -74,7 +83,7 @@ export class RustCompiler {
     const interfacePath = path.resolve(
       this.hre.config.paths.artifacts,
       contract.interface.path,
-      `${contract.interface.name}.json`,
+      `${interfaceName}.json`,
     );
 
     if (!fs.existsSync(interfacePath)) {

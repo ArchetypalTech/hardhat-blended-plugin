@@ -8,7 +8,7 @@ export declare class ArtifactBuilder {
     /**
      * Saves contract artifact and associated files
      */
-    saveArtifact(config: ContractConfig, interfaceABI: any[], contractName: string, bytecode: string): Promise<void>;
+    saveArtifact(config: ContractConfig, interfaceABI: any[], contractName: string, interfaceName: string, bytecode: string): Promise<void>;
     /**
      * Formats contract path for artifact storage
      */

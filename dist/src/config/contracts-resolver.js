@@ -4,9 +4,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ContractsResolver = void 0;
-const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
 const glob_1 = __importDefault(require("glob"));
+const path_1 = __importDefault(require("path"));
 const errors_1 = require("./errors");
 class ContractsResolver {
     /**
@@ -156,28 +156,40 @@ class ContractsResolver {
     /**
      * Creates full contract configurations by merging discovered contracts with settings
      */
-    createContractConfigs(discoveredContracts, config) {
-        return discoveredContracts.map((contract) => (Object.assign(Object.assign({}, contract), { compile: Object.assign({}, config.compile), test: Object.assign({}, config.test) })));
+    createContractConfigs(discoveredContracts, globalCompileConfig, globalTestConfig) {
+        return discoveredContracts.map((contract) => (Object.assign(Object.assign({}, contract), { compile: Object.assign({}, globalCompileConfig), test: Object.assign({}, globalTestConfig) })));
     }
     /**
      * Resolves complete contract configurations.
      * Handles both explicitly configured contracts and auto-discovered ones.
      */
-    resolve(config) {
-        var _a, _b, _c;
-        // If auto-discovery is disabled and explicit contracts exist, use only those
-        if (((_a = config.contracts) === null || _a === void 0 ? void 0 : _a.length) > 0 && ((_b = config.discovery) === null || _b === void 0 ? void 0 : _b.enabled) === false) {
-            return config.contracts.map((contract) => (Object.assign(Object.assign({}, contract), { path: this.validateContractPath(contract.path) })));
+    resolve(config, globalCompileConfig, globalTestConfig) {
+        var _a, _b;
+        if (((_a = config.discovery) === null || _a === void 0 ? void 0 : _a.enabled) === false && !config.contracts) {
+            throw new errors_1.ConfigurationError('Invalid configuration', ['No contracts configured and auto-discovery is disabled'], errors_1.ErrorCode.INVALID_CONFIGURATION);
         }
-        // Perform auto-discovery
-        const discoveredContracts = this.discoverContracts(config);
-        const contractConfigs = this.createContractConfigs(discoveredContracts, config);
-        // Merge with explicitly configured contracts if they exist
-        if (((_c = config.contracts) === null || _c === void 0 ? void 0 : _c.length) > 0) {
-            const validatedConfiguredContracts = config.contracts.map((contract) => (Object.assign(Object.assign({}, contract), { path: this.validateContractPath(contract.path) })));
-            return [...contractConfigs, ...validatedConfiguredContracts];
+        let contracts = [];
+        if (config.contracts) {
+            contracts = config.contracts.map((contract) => {
+                var _a, _b;
+                return ({
+                    path: this.validateContractPath(contract.path),
+                    interface: contract.interface,
+                    compile: (_a = contract.compile) !== null && _a !== void 0 ? _a : Object.assign({}, globalCompileConfig),
+                    test: (_b = contract.test) !== null && _b !== void 0 ? _b : Object.assign({}, globalTestConfig),
+                });
+            });
         }
-        return contractConfigs;
+        // Discover contracts if none are explicitly configured
+        if (contracts.length == 0 && ((_b = config.discovery) === null || _b === void 0 ? void 0 : _b.enabled) !== false) {
+            const discoveredContracts = this.discoverContracts(config);
+            const discoveredConfigs = this.createContractConfigs(discoveredContracts, globalCompileConfig, globalTestConfig);
+            contracts = [...contracts, ...discoveredConfigs];
+        }
+        if (contracts.length === 0) {
+            throw new errors_1.ConfigurationError('No contracts found', ['Could not find any contracts in the project'], errors_1.ErrorCode.NO_CONTRACTS);
+        }
+        return contracts;
     }
 }
 exports.ContractsResolver = ContractsResolver;

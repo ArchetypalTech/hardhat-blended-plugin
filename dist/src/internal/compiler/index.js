@@ -24,7 +24,9 @@ class RustCompiler {
     async compileContract(contract, options) {
         try {
             const contractPath = path_1.default.resolve(this.hre.config.paths.root, contract.path);
+            const interfacePath = path_1.default.resolve(this.hre.config.paths.root, contract.interface.path);
             const contractName = path_1.default.basename(this.artifactBuilder.formatContractPath(contractPath));
+            const interfaceName = path_1.default.basename(interfacePath, path_1.default.extname(interfacePath));
             if (options.verbose) {
                 console.log('Compiling with settings:', contract.compile);
             }
@@ -35,8 +37,8 @@ class RustCompiler {
                 console.log(`WASM path: ${wasmPath}`);
             }
             const bytecode = this.getBytecode(wasmPath);
-            const interfaceABI = this.getInterfaceABI(contract);
-            await this.artifactBuilder.saveArtifact(contract, interfaceABI, contractName, bytecode);
+            const interfaceABI = this.getInterfaceABI(contract, interfaceName);
+            await this.artifactBuilder.saveArtifact(contract, interfaceABI, contractName, interfaceName, bytecode);
             return {
                 contractName,
                 success: true,
@@ -51,11 +53,11 @@ class RustCompiler {
             };
         }
     }
-    getInterfaceABI(contract) {
+    getInterfaceABI(contract, interfaceName) {
         if (!contract.interface) {
             throw errors_1.CompilerErrors.interfaceNotFound(contract.path);
         }
-        const interfacePath = path_1.default.resolve(this.hre.config.paths.artifacts, contract.interface.path, `${contract.interface.name}.json`);
+        const interfacePath = path_1.default.resolve(this.hre.config.paths.artifacts, contract.interface.path, `${interfaceName}.json`);
         if (!fs_1.default.existsSync(interfacePath)) {
             throw errors_1.CompilerErrors.interfaceNotFound(interfacePath);
         }

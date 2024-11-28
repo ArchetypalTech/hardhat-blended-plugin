@@ -15,6 +15,7 @@ export declare const CompilerErrors: {
     readonly rustNotInstalled: () => CompilerError;
     readonly compilationFailed: (contractPath: string, error: string) => CompilerError;
     readonly wasmNotFound: (path: string) => CompilerError;
+    readonly contractNotFound: (path: string) => CompilerError;
     readonly interfaceNotFound: (path: string) => CompilerError;
     readonly invalidConfig: (message: string, details: string[]) => CompilerError;
     readonly buildFailed: (message: string, details?: string[]) => CompilerError;
