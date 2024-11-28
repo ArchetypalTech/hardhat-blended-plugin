@@ -5,7 +5,7 @@ target/
 
 # Hardhat
 cache/
-artifacts/
+# artifacts/
 typechain/
 typechain-types/
 
@@ -42,4 +42,6 @@ Cargo.lock
 **/*.rs.bk
 
 # Hardhat deployment
-deployments/
+*/deployments/
+dataDir
+artifacts

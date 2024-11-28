@@ -48,7 +48,7 @@ describe('BasicContract', function () {
     }
 
     // Read the contract artifact
-    const artifact = await artifacts.readArtifact('basic_contract.wasm');
+    const artifact = await artifacts.readArtifact('BasicContract');
 
     // Get the deployer account
     const [deployer] = await ethers.getSigners();

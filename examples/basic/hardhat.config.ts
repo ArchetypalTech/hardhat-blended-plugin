@@ -23,7 +23,7 @@ const config: HardhatUserConfig = {
     },
   },
   solidity: {
-    version: '0.8.20',
+    version: '0.8.27',
     settings: {
       optimizer: {
         enabled: true,
@@ -31,12 +31,6 @@ const config: HardhatUserConfig = {
       },
     },
   },
-  compileToWasmConfig: [
-    {
-      contractDir: './contracts/basic-contract',
-      interfacePath: './contracts/IBasicContract.sol',
-    },
-  ],
 };
 
 export default config;
