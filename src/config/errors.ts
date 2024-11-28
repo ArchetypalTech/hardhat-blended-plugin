@@ -10,6 +10,7 @@ export enum ErrorCode {
   UNKNOWN_ERROR = 'UNKNOWN_ERROR',
   MERGE_ERROR = 'MERGE_ERROR',
   CARGO_NOT_FOUND = 'CARGO_NOT_FOUND',
+  INVALID_CONFIGURATION = 'INVALID_CONFIGURATION',
 }
 export class ConfigurationError extends Error {
   constructor(

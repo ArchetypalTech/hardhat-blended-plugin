@@ -2,7 +2,8 @@ import path from 'path';
 import fs from 'fs';
 import glob from 'glob';
 import { ConfigurationError, ErrorCode } from './errors';
-import { ContractConfig, FluentConfig } from './schema';
+import { CompileSettings, ContractConfig, FluentConfig, TestSettings, UserConfig } from './schema';
+import { DEFAULT_SETTINGS } from './defaults';
 
 /**
  * Represents basic contract information discovered during the scanning process
@@ -10,7 +11,6 @@ import { ContractConfig, FluentConfig } from './schema';
 interface DiscoveredContract {
   path: string;
   interface: {
-    name: string;
     path: string;
   };
 }
@@ -142,7 +142,7 @@ export class ContractsResolver {
    * Discovers base contract information in the project
    * @throws {ConfigurationError} if no valid contracts are found
    */
-  private discoverContracts(config: FluentConfig): DiscoveredContract[] {
+  private discoverContracts(config: UserConfig): DiscoveredContract[] {
     const projectRoot = process.cwd();
     const searchPaths = config.discovery?.paths
       ? config.discovery.paths.map((p) => `${p}/**/Cargo.toml`)
@@ -212,12 +212,13 @@ export class ContractsResolver {
    */
   private createContractConfigs(
     discoveredContracts: DiscoveredContract[],
-    config: FluentConfig,
+    globalCompileConfig: CompileSettings,
+    globalTestConfig: TestSettings,
   ): ContractConfig[] {
-    return discoveredContracts.map((contract) => ({
+    return discoveredContracts.map(contract => ({
       ...contract,
-      compile: { ...config.compile },
-      test: { ...config.test },
+      compile: { ...globalCompileConfig },
+      test: { ...globalTestConfig }
     }));
   }
 
@@ -225,29 +226,49 @@ export class ContractsResolver {
    * Resolves complete contract configurations.
    * Handles both explicitly configured contracts and auto-discovered ones.
    */
-  resolve(config: FluentConfig): ContractConfig[] {
-    // If auto-discovery is disabled and explicit contracts exist, use only those
-    if (config.contracts?.length > 0 && config.discovery?.enabled === false) {
-      return config.contracts.map((contract) => ({
-        ...contract,
+  resolve(
+    config: UserConfig,
+    globalCompileConfig: CompileSettings,
+    globalTestConfig: TestSettings
+  ): ContractConfig[] {
+    if (config.discovery?.enabled === false && !config.contracts) {
+      throw new ConfigurationError(
+        'Invalid configuration',
+        ['No contracts configured and auto-discovery is disabled'],
+        ErrorCode.INVALID_CONFIGURATION,
+      );
+    }
+
+    let contracts: ContractConfig[] = [];
+
+
+    if (config.contracts) {
+      contracts = config.contracts.map(contract => ({
         path: this.validateContractPath(contract.path),
+        interface: contract.interface,
+        compile: contract.compile ?? { ...globalCompileConfig },
+        test: contract.test ?? { ...globalTestConfig },
       }));
     }
 
-    // Perform auto-discovery
-    const discoveredContracts = this.discoverContracts(config);
-    const contractConfigs = this.createContractConfigs(discoveredContracts, config);
-
-    // Merge with explicitly configured contracts if they exist
-    if (config.contracts?.length > 0) {
-      const validatedConfiguredContracts = config.contracts.map((contract) => ({
-        ...contract,
-        path: this.validateContractPath(contract.path),
-      }));
-
-      return [...contractConfigs, ...validatedConfiguredContracts];
+    if (config.discovery?.enabled !== false) {
+      const discoveredContracts = this.discoverContracts(config);
+      const discoveredConfigs = this.createContractConfigs(
+        discoveredContracts,
+        globalCompileConfig,
+        globalTestConfig
+      );
+      contracts = [...contracts, ...discoveredConfigs];
     }
 
-    return contractConfigs;
+    if (contracts.length === 0) {
+      throw new ConfigurationError(
+        'No contracts found',
+        ['Could not find any contracts in the project'],
+        ErrorCode.NO_CONTRACTS,
+      );
+    }
+
+    return contracts;
   }
 }

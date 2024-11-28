@@ -30,10 +30,19 @@ const NodeSettingsSchema = z.object({
   }),
 });
 
+const UserContractConfigSchema = z.object({
+  path: z.string(),
+  interface: z.object({
+    path: z.string(),
+  }),
+  compile: CompileSettingsSchema.optional(),
+  test: TestSettingsSchema.optional(),
+});
+
+
 const ContractConfigSchema = z.object({
   path: z.string(),
   interface: z.object({
-    name: z.string(),
     path: z.string(),
   }),
   compile: CompileSettingsSchema,
@@ -46,7 +55,7 @@ const UserConfigSchema = z.object({
   test: TestSettingsSchema.optional(),
   node: NodeSettingsSchema.optional(),
   env: z.record(z.string()).optional(),
-  contracts: z.array(ContractConfigSchema).optional(),
+  contracts: z.array(UserContractConfigSchema).optional(),
   discovery: z
     .object({
       enabled: z.boolean().optional(),
@@ -60,6 +69,10 @@ export const FluentConfigSchema = UserConfigSchema.transform((config) => {
   const baseConfig = {
     ...DEFAULT_SETTINGS,
     ...config,
+    env: {
+      ...DEFAULT_SETTINGS.env,
+      ...(config.env || {}),
+    } as Record<string, string>,
     discovery: {
       ...DEFAULT_SETTINGS.discovery,
       ...config.discovery,
@@ -67,18 +80,15 @@ export const FluentConfigSchema = UserConfigSchema.transform((config) => {
   };
 
   const resolver = new ContractsResolver();
-  let contracts: z.infer<typeof ContractConfigSchema>[] = [];
+  let contracts: z.infer<typeof UserContractConfigSchema>[] = [];
 
-  // If contracts are provided, use them
   if (config.contracts && config.contracts.length > 0) {
     contracts = config.contracts;
-  }
-  // Otherwise, try to discover contracts
-  else if (baseConfig.discovery.enabled !== false) {
-    contracts = resolver.resolve(baseConfig);
+  } else if (baseConfig.discovery.enabled !== false) {
+    contracts = resolver.resolve(baseConfig, baseConfig.compile, baseConfig.test);
   }
 
-  // Merge contract settings with base settings
+  // Process contracts with proper inheritance
   const processedContracts = contracts.map((contract) => ({
     ...contract,
     compile: {
@@ -98,6 +108,8 @@ export const FluentConfigSchema = UserConfigSchema.transform((config) => {
 });
 
 export type UserConfig = z.infer<typeof UserConfigSchema>;
+export type UserContractConfig = z.infer<typeof UserContractConfigSchema>;
+
 export type CompileSettings = z.infer<typeof CompileSettingsSchema>;
 export type TestSettings = z.infer<typeof TestSettingsSchema>;
 export type NodeSettings = z.infer<typeof NodeSettingsSchema>;

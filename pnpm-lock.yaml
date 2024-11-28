@@ -57,7 +57,7 @@ importers:
         specifier: ^3.3.3
         version: 3.4.1
       sinon:
-        specifier: ^18.0.0
+        specifier: ^18.0.1
         version: 18.0.1
       sinon-chai:
         specifier: ^3.7.0
