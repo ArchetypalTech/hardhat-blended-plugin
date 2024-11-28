@@ -29,12 +29,12 @@
     "lint:fix": "eslint . --ext .ts --fix && prettier --write 'src/**/*.{js,ts}' 'test/**/*.{js,ts}'",
     "format": "prettier --write 'src/**/*.ts' 'test/**/*.ts'",
     "test": "mocha",
+    "test:watch": "mocha --watch",
     "test:fixtures": "cd test/fixtures/basic && pnpm test",
     "test:all": "pnpm test && pnpm test:fixtures",
     "build": "tsc",
     "watch": "tsc -w",
     "clean": "rm -rf node_modules dist",
-    "prepare": "pnpm run build",
     "preversion": "pnpm run test:all",
     "version:patch": "pnpm version patch",
     "version:minor": "pnpm version minor",
@@ -42,6 +42,7 @@
     "release": "pnpm run test:all && pnpm run build"
   },
   "devDependencies": {
+
     "@types/chai": "^4.3.16",
     "@types/fs-extra": "11.0.4",
     "@types/mocha": "^10.0.9",
@@ -62,10 +63,9 @@
     "sinon-chai": "^3.7.0",
     "ts-node": "10.9.2",
     "typescript": "5.6.3",
-    "@nomicfoundation/hardhat-ethers": "^3.0.0",
-    "ethers": "^6.0.0"
+    "zod": "3.23.8"
   },
   "peerDependencies": {
-    "hardhat": "2.22.15"
+    "hardhat": "^2.0.0"
   }
 }
