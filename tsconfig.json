@@ -10,7 +10,11 @@
     "rootDirs": ["./src", "./test"],
     "noImplicitAny": false,
     "esModuleInterop": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@fluent.xyz/hardhat-plugin/*": ["src/*"]
+    }
   },
   "exclude": ["dist", "node_modules", "test/fixtures"],
   "include": ["./test", "./src"]
