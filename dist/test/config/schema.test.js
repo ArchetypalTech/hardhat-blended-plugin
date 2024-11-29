@@ -28,26 +28,25 @@ const schema_1 = require("../../src/config/schema");
 const defaults_1 = require("../../src/config/defaults");
 const sinon = __importStar(require("sinon"));
 const contracts_resolver_1 = require("../../src/config/contracts-resolver");
-describe("FluentConfigSchema", () => {
+describe('FluentConfigSchema', () => {
     let sandbox;
     let resolveStub;
     beforeEach(() => {
         sandbox = sinon.createSandbox();
-        // Create a stub that returns mock contracts
-        resolveStub = sandbox.stub(contracts_resolver_1.ContractsResolver.prototype, 'resolve').returns([{
-                path: "mock/contract/path",
+        resolveStub = sandbox.stub(contracts_resolver_1.ContractsResolver.prototype, 'discoverContracts').returns([
+            {
+                path: 'mock/contract/path',
                 interface: {
-                    path: "IMockContract.sol",
+                    path: 'IMockContract.sol',
                 },
-                compile: defaults_1.DEFAULT_SETTINGS.compile,
-                test: defaults_1.DEFAULT_SETTINGS.test,
-            }]);
+            },
+        ]);
     });
     afterEach(() => {
         sandbox.restore();
     });
-    describe("Default Values", () => {
-        it("should apply default values for empty config", () => {
+    describe('Default Values', () => {
+        it('should apply default values for empty config', () => {
             const userConfig = {};
             const config = schema_1.FluentConfigSchema.parse(userConfig);
             (0, chai_1.expect)(config.compile).to.deep.equal(defaults_1.DEFAULT_SETTINGS.compile);
@@ -57,140 +56,165 @@ describe("FluentConfigSchema", () => {
             (0, chai_1.expect)(config.env).to.deep.equal(defaults_1.DEFAULT_SETTINGS.env);
             (0, chai_1.expect)(config.contracts).to.have.lengthOf(1);
         });
-        it("should merge user values with defaults", () => {
+        it('should merge user values with defaults', () => {
             const userConfig = {
                 compile: {
-                    target: "custom-target",
+                    target: 'custom-target',
                     debug: true,
-                    options: ["--custom-option"],
+                    options: ['--custom-option'],
                 },
             };
             const config = schema_1.FluentConfigSchema.parse(userConfig);
-            (0, chai_1.expect)(config.compile.target).to.equal("custom-target");
+            (0, chai_1.expect)(config.compile.target).to.equal('custom-target');
             (0, chai_1.expect)(config.compile.debug).to.be.true;
-            (0, chai_1.expect)(config.compile.options).to.include("--custom-option");
+            (0, chai_1.expect)(config.compile.options).to.deep.equal(['--custom-option']);
             (0, chai_1.expect)(config.test).to.deep.equal(defaults_1.DEFAULT_SETTINGS.test);
         });
     });
-    describe("Contract Configuration", () => {
-        it("should process explicitly configured contracts", () => {
+    describe('Contract Configuration', () => {
+        it('should process explicitly configured contracts', () => {
             const userConfig = {
-                discovery: { enabled: false },
-                contracts: [{
-                        path: "test/contract/path",
+                contracts: [
+                    {
+                        path: 'test/contract/path',
                         interface: {
-                            path: "ITestContract.sol",
+                            path: 'ITestContract.sol',
                         },
                         compile: {
-                            target: "wasm32-unknown-unknown",
+                            target: 'wasm32-unknown-unknown',
                             debug: false,
-                            options: ["--custom-option"],
+                            options: ['--custom-option'],
                         },
                         test: {
-                            command: "cargo test",
-                            options: ["--test-option"],
+                            command: 'cargo test',
+                            options: ['--test-option'],
                             timeout: 1000,
                             retries: 0,
                         },
-                    }],
-            };
-            const config = schema_1.FluentConfigSchema.parse(userConfig);
-            (0, chai_1.expect)(config.contracts).to.have.length(1);
-            (0, chai_1.expect)(config.contracts[0].compile.options).to.include("--custom-option");
-            (0, chai_1.expect)(config.contracts[0].test.options).to.include("--test-option");
-        });
-        it("should merge contract settings with global settings", () => {
-            const userConfig = {
-                compile: {
-                    target: "global-target",
-                    debug: true,
-                    options: ["--global-option"],
-                },
-                contracts: [{
-                        path: "test/contract/path",
-                        interface: {
-                            path: "ITestContract.sol",
-                        },
-                        compile: {
-                            target: "contract-target",
-                            debug: false,
-                            options: ["--contract-option"],
-                        },
-                        test: defaults_1.DEFAULT_SETTINGS.test,
                     },
-                    {
-                        path: "test/contract/path2",
-                        interface: {
-                            path: "ITestContract2.sol",
-                        }
-                    }
                 ],
             };
             const config = schema_1.FluentConfigSchema.parse(userConfig);
-            (0, chai_1.expect)(config.contracts[0].compile.target).to.equal("contract-target");
-            (0, chai_1.expect)(config.contracts[0].compile.options).to.include("--contract-option");
-            (0, chai_1.expect)(config.contracts[1].compile.target).to.equal("global-target");
-            (0, chai_1.expect)(config.compile.target).to.equal("global-target");
+            (0, chai_1.expect)(config.contracts).to.have.length(1);
+            (0, chai_1.expect)(config.contracts[0].compile.options).to.deep.equal(['--custom-option']);
+            (0, chai_1.expect)(config.contracts[0].test.options).to.deep.equal(['--test-option']);
+        });
+        it('should merge contract settings with global settings', () => {
+            const userConfig = {
+                compile: {
+                    target: 'global-target',
+                    debug: true,
+                    options: ['--global-option'],
+                },
+                contracts: [
+                    {
+                        path: 'test/contract/path',
+                        interface: {
+                            path: 'ITestContract.sol',
+                        },
+                        compile: {
+                            target: 'contract-target',
+                            debug: false,
+                            options: ['--contract-option'],
+                        },
+                    },
+                    {
+                        path: 'test/contract/path2',
+                        interface: {
+                            path: 'ITestContract2.sol',
+                        },
+                    },
+                ],
+            };
+            const config = schema_1.FluentConfigSchema.parse(userConfig);
+            (0, chai_1.expect)(config.contracts[0].compile.target).to.equal('contract-target');
+            (0, chai_1.expect)(config.contracts[0].compile.options).to.deep.equal(['--contract-option']);
+            (0, chai_1.expect)(config.contracts[1].compile.target).to.equal('global-target');
+            (0, chai_1.expect)(config.contracts[1].compile.options).to.deep.equal(['--global-option']);
+            (0, chai_1.expect)(config.compile.target).to.equal('global-target');
         });
     });
-    describe("Discovery Settings", () => {
-        it("should handle disabled discovery", () => {
+    describe('Discovery Settings', () => {
+        it('should throw error when discovery is disabled and no contracts provided', () => {
             const userConfig = {
                 discovery: {
                     enabled: false,
+                    paths: ['contracts', 'src'],
+                    ignore: ['**/target/**', '**/node_modules/**'],
                 },
                 contracts: [], // Empty contracts with disabled discovery
             };
-            const config = schema_1.FluentConfigSchema.parse(userConfig);
-            (0, chai_1.expect)(config.discovery.enabled).to.be.false;
-            (0, chai_1.expect)(config.contracts).to.be.an('array').that.is.empty;
+            (0, chai_1.expect)(() => schema_1.FluentConfigSchema.parse(userConfig)).to.throw('No contracts configured and auto-discovery is disabled');
         });
-        it("should merge discovery settings", () => {
+        it('should disable discovery when contracts are provided', () => {
             const userConfig = {
                 discovery: {
-                    paths: ["custom-path"],
+                    enabled: true,
+                    paths: ['contracts', 'src'],
+                    ignore: ['**/target/**', '**/node_modules/**'],
                 },
+                contracts: [
+                    {
+                        path: 'test/contract',
+                        interface: { path: 'test/interface' },
+                    },
+                ],
             };
             const config = schema_1.FluentConfigSchema.parse(userConfig);
-            (0, chai_1.expect)(config.discovery.enabled).to.be.true;
-            (0, chai_1.expect)(config.discovery.paths).to.include("custom-path");
-            (0, chai_1.expect)(config.discovery.ignore).to.deep.equal(defaults_1.DEFAULT_SETTINGS.discovery.ignore);
+            (0, chai_1.expect)(config.discovery.enabled).to.be.false;
+            (0, chai_1.expect)(config.contracts).to.have.lengthOf(1);
         });
     });
-    describe("Validation", () => {
-        it("should validate docker pull policy", () => {
+    describe('Validation', () => {
+        it('should validate docker pull policy', () => {
             const userConfig = {
                 node: {
                     docker: {
-                        image: "test-image",
-                        tag: "latest",
-                        pull: "invalid",
+                        image: 'test-image',
+                        tag: 'latest',
+                        pull: 'invalid',
                     },
-                    network: defaults_1.DEFAULT_SETTINGS.node.network,
                 },
             };
             (0, chai_1.expect)(() => schema_1.FluentConfigSchema.parse(userConfig)).to.throw();
         });
-        it("should validate required contract fields", () => {
+        it('should validate required contract fields', () => {
             const userConfig = {
-                contracts: [{
-                        path: "test-path",
+                contracts: [
+                    {
+                        path: 'test-path',
                         // Missing interface field
-                    }],
+                    },
+                ],
             };
             (0, chai_1.expect)(() => schema_1.FluentConfigSchema.parse(userConfig)).to.throw();
         });
     });
-    describe("Environment Variables", () => {
-        it("should merge environment variables", () => {
+    describe('Environment Variables', () => {
+        it('should merge environment variables', () => {
             const userConfig = {
                 env: {
-                    CUSTOM_VAR: "custom-value",
+                    CUSTOM_VAR: 'custom-value',
                 },
             };
             const config = schema_1.FluentConfigSchema.parse(userConfig);
-            (0, chai_1.expect)(config.env).to.include(defaults_1.DEFAULT_SETTINGS.env);
-            (0, chai_1.expect)(config.env.CUSTOM_VAR).to.equal("custom-value");
+            (0, chai_1.expect)(config.env).to.deep.include({
+                RUST_LOG: 'info',
+                CUSTOM_VAR: 'custom-value',
+            });
+        });
+        it('should allow overriding default env variables', () => {
+            const userConfig = {
+                env: {
+                    RUST_LOG: 'debug',
+                    CUSTOM_VAR: 'custom-value',
+                },
+            };
+            const config = schema_1.FluentConfigSchema.parse(userConfig);
+            (0, chai_1.expect)(config.env).to.deep.equal({
+                RUST_LOG: 'debug',
+                CUSTOM_VAR: 'custom-value',
+            });
         });
     });
 });

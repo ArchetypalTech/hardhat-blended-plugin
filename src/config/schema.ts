@@ -1,4 +1,3 @@
-// config/schema.ts
 import { z } from 'zod';
 import { DEFAULT_SETTINGS } from './defaults';
 import { ContractsResolver } from './contracts-resolver';
@@ -32,20 +31,6 @@ const NodeSettingsSchema = z.object({
   }),
 });
 
-// User input schemas (partial)
-const UserCompileSettingsSchema = CompileSettingsSchema.partial();
-const UserTestSettingsSchema = TestSettingsSchema.partial();
-const UserNodeSettingsSchema = NodeSettingsSchema.deepPartial();
-
-const UserContractConfigSchema = z.object({
-  path: z.string(),
-  interface: z.object({
-    path: z.string(),
-  }),
-  compile: UserCompileSettingsSchema.optional(),
-  test: UserTestSettingsSchema.optional(),
-});
-
 const ContractConfigSchema = z.object({
   path: z.string(),
   interface: z.object({
@@ -55,90 +40,114 @@ const ContractConfigSchema = z.object({
   test: TestSettingsSchema,
 });
 
-// User config with automatic discovery disabling
-const UserConfigSchema = z
+export const FluentConfigSchema = z
   .object({
-    compile: UserCompileSettingsSchema.optional(),
-    test: UserTestSettingsSchema.optional(),
-    node: UserNodeSettingsSchema.optional(),
+    compile: CompileSettingsSchema.partial().optional(),
+    test: TestSettingsSchema.partial().optional(),
+    node: NodeSettingsSchema.deepPartial().optional(),
     env: z.record(z.string()).optional(),
-    contracts: z.array(UserContractConfigSchema).optional(),
+    contracts: z
+      .array(
+        z.object({
+          path: z.string(),
+          interface: z.object({
+            path: z.string(),
+          }),
+          compile: CompileSettingsSchema.partial().optional(),
+          test: TestSettingsSchema.partial().optional(),
+        }),
+      )
+      .optional(),
     discovery: z
       .object({
-        enabled: z.boolean().optional(),
-        paths: z.array(z.string()).optional(),
-        ignore: z.array(z.string()).optional(),
+        enabled: z.boolean(),
+        paths: z.array(z.string()),
+        ignore: z.array(z.string()),
       })
       .optional(),
   })
-  .superRefine((data, ctx) => {
-    if (data.contracts?.length) {
-      if (!data.discovery) {
-        data.discovery = { enabled: false };
-      } else {
-        data.discovery.enabled = false;
-      }
+  .transform((config) => {
+    if (config.contracts?.length) {
+      return {
+        ...DEFAULT_SETTINGS,
+        ...config,
+        env: {
+          ...DEFAULT_SETTINGS.env,
+          ...(config.env || {}),
+        },
+        discovery: {
+          ...DEFAULT_SETTINGS.discovery,
+          enabled: false,
+          ignore: [],
+          paths: [],
+        },
+        contracts: config.contracts.map((contract) => ({
+          path: contract.path,
+          interface: contract.interface,
+          compile: {
+            ...DEFAULT_SETTINGS.compile,
+            ...(config.compile || {}),
+            ...(contract.compile || {}),
+          },
+          test: {
+            ...DEFAULT_SETTINGS.test,
+            ...(config.test || {}),
+            ...(contract.test || {}),
+          },
+        })),
+      };
     }
-  });
 
-export const FluentConfigSchema = UserConfigSchema.transform((config) => {
-  const baseConfig = {
-    ...DEFAULT_SETTINGS,
-    ...config,
-    compile: {
-      ...DEFAULT_SETTINGS.compile,
-      ...(config.compile || {}),
-    },
-    test: {
-      ...DEFAULT_SETTINGS.test,
-      ...(config.test || {}),
-    },
-    node: {
-      docker: {
-        ...DEFAULT_SETTINGS.node.docker,
-        ...(config.node?.docker || {}),
-      },
-      network: {
-        ...DEFAULT_SETTINGS.node.network,
-        ...(config.node?.network || {}),
-      },
-    },
-    env: {
-      ...DEFAULT_SETTINGS.env,
-      ...(config.env || {}),
-    },
-    discovery: {
-      ...DEFAULT_SETTINGS.discovery,
-      ...(config.discovery || {}),
-    },
-  };
+    if (config.discovery?.enabled !== false) {
+      const resolver = new ContractsResolver();
+      const discoveredContracts = resolver.discoverContracts({
+        discovery: {
+          ...DEFAULT_SETTINGS.discovery,
+          ...(config.discovery || {}),
+        },
+      });
 
-  const resolver = new ContractsResolver();
-  const contracts = resolver.resolve(config, baseConfig.compile, baseConfig.test);
+      return {
+        ...DEFAULT_SETTINGS,
+        ...config,
+        env: {
+          ...DEFAULT_SETTINGS.env,
+          ...(config.env || {}),
+        },
+        contracts: discoveredContracts.map((contract) => ({
+          ...contract,
+          compile: {
+            ...DEFAULT_SETTINGS.compile,
+            ...(config.compile || {}),
+          },
+          test: {
+            ...DEFAULT_SETTINGS.test,
+            ...(config.test || {}),
+          },
+        })),
+      };
+    }
 
-  return {
-    ...baseConfig,
-    contracts,
-  };
-}).pipe(
-  z.object({
-    compile: CompileSettingsSchema,
-    test: TestSettingsSchema,
-    node: NodeSettingsSchema,
-    env: z.record(z.string()),
-    discovery: z.object({
-      enabled: z.boolean(),
-      paths: z.array(z.string()),
-      ignore: z.array(z.string()),
+    throw new Error('No contracts configured and auto-discovery is disabled');
+  })
+  .pipe(
+    z.object({
+      compile: CompileSettingsSchema,
+      test: TestSettingsSchema,
+      node: NodeSettingsSchema,
+      env: z.record(z.string()),
+      discovery: z.object({
+        enabled: z.boolean(),
+        paths: z.array(z.string()),
+        ignore: z.array(z.string()),
+      }),
+      contracts: z.array(ContractConfigSchema),
     }),
-    contracts: z.array(ContractConfigSchema),
-  }),
-);
+  );
 
-export type UserConfig = z.infer<typeof UserConfigSchema>;
-export type UserContractConfig = z.infer<typeof UserContractConfigSchema>;
+export type UserConfig = z.input<typeof FluentConfigSchema>;
+export type FluentConfig = z.output<typeof FluentConfigSchema>;
+export type ContractConfig = z.infer<typeof ContractConfigSchema>;
 export type CompileSettings = z.infer<typeof CompileSettingsSchema>;
 export type TestSettings = z.infer<typeof TestSettingsSchema>;
 export type NodeSettings = z.infer<typeof NodeSettingsSchema>;
-export type ContractConfig = z.infer<typeof ContractConfigSchema>;
-export type FluentConfig = z.output<typeof FluentConfigSchema>;

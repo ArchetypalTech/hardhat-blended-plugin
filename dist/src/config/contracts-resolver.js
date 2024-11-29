@@ -26,7 +26,6 @@ class ContractsResolver {
     }
     /**
      * Resolves contract name from Cargo.toml manifest
-     * @throws {ConfigurationError} if Cargo.toml is invalid or cannot be read
      */
     resolveContractName(contractPath) {
         const cargoPath = path_1.default.join(contractPath.endsWith('Cargo.toml') ? path_1.default.dirname(contractPath) : contractPath, 'Cargo.toml');
@@ -45,45 +44,7 @@ class ContractsResolver {
         }
     }
     /**
-     * Finds a Solidity interface file for a contract
-     * @throws {ConfigurationError} if interface file is not found
-     */
-    findContractInterface(contractDir, contractName) {
-        const interfaceName = this.getInterfaceName(contractName);
-        const interfacePath = path_1.default.join(path_1.default.dirname(contractDir), `${interfaceName}.sol`);
-        if (!fs_1.default.existsSync(interfacePath)) {
-            throw new errors_1.ConfigurationError('Interface file not found', [
-                `Expected interface file at: ${interfacePath}`,
-                `Interface should be named: ${interfaceName}.sol`,
-                'Make sure the interface file exists and follows the naming convention',
-            ], errors_1.ErrorCode.INTERFACE_NOT_FOUND);
-        }
-        return {
-            name: interfaceName,
-            path: path_1.default.relative(process.cwd(), interfacePath),
-        };
-    }
-    /**
-     * Validates and normalizes a contract path
-     * @throws {ConfigurationError} if path is invalid or Cargo.toml is missing
-     */
-    validateContractPath(contractPath) {
-        const normalizedPath = path_1.default.normalize(contractPath);
-        if (normalizedPath.endsWith('Cargo.toml')) {
-            if (!fs_1.default.existsSync(normalizedPath)) {
-                throw new errors_1.ConfigurationError('Invalid contract path', [`Path does not exist: ${normalizedPath}`], errors_1.ErrorCode.INVALID_PATH);
-            }
-            return normalizedPath;
-        }
-        const cargoPath = path_1.default.join(normalizedPath, 'Cargo.toml');
-        if (!fs_1.default.existsSync(cargoPath)) {
-            throw new errors_1.ConfigurationError('Invalid contract path', [`Cargo.toml not found in directory: ${normalizedPath}`], errors_1.ErrorCode.MISSING_CARGO);
-        }
-        return normalizedPath;
-    }
-    /**
      * Checks if a directory contains a valid Rust contract
-     * Validates presence of Cargo.toml and fluentbase dependency
      */
     isValidContractDirectory(directoryPath) {
         try {
@@ -98,8 +59,24 @@ class ContractsResolver {
         }
     }
     /**
-     * Discovers base contract information in the project
-     * @throws {ConfigurationError} if no valid contracts are found
+     * Finds a Solidity interface file for a contract
+     */
+    findContractInterface(contractDir, contractName) {
+        const interfaceName = this.getInterfaceName(contractName);
+        const interfacePath = path_1.default.join(path_1.default.dirname(contractDir), `${interfaceName}.sol`);
+        if (!fs_1.default.existsSync(interfacePath)) {
+            throw new errors_1.ConfigurationError('Interface file not found', [
+                `Expected interface file at: ${interfacePath}`,
+                `Interface should be named: ${interfaceName}.sol`,
+                'Make sure the interface file exists and follows the naming convention',
+            ], errors_1.ErrorCode.INTERFACE_NOT_FOUND);
+        }
+        return {
+            path: path_1.default.relative(process.cwd(), interfacePath),
+        };
+    }
+    /**
+     * Discovers contracts in the project
      */
     discoverContracts(config) {
         var _a, _b, _c, _d;
@@ -152,30 +129,6 @@ class ContractsResolver {
                 throw error;
             throw new errors_1.ConfigurationError('Failed to discover contracts', [error.message], errors_1.ErrorCode.DISCOVERY_ERROR);
         }
-    }
-    resolve(config, globalCompileConfig, globalTestConfig) {
-        var _a, _b;
-        if ((_a = config.contracts) === null || _a === void 0 ? void 0 : _a.length) {
-            return config.contracts.map((contract) => ({
-                path: this.validateContractPath(contract.path),
-                interface: contract.interface,
-                compile: Object.assign(Object.assign({}, globalCompileConfig), (contract.compile || {})),
-                test: Object.assign(Object.assign({}, globalTestConfig), (contract.test || {})),
-            }));
-        }
-        if (((_b = config.discovery) === null || _b === void 0 ? void 0 : _b.enabled) !== false) {
-            const discoveredContracts = this.discoverContracts(config);
-            if (discoveredContracts.length === 0) {
-                throw new errors_1.ConfigurationError('No contracts found', ['Could not find any contracts in the project'], errors_1.ErrorCode.NO_CONTRACTS);
-            }
-            return discoveredContracts.map((contract) => ({
-                path: contract.path,
-                interface: contract.interface,
-                compile: Object.assign({}, globalCompileConfig),
-                test: Object.assign({}, globalTestConfig),
-            }));
-        }
-        throw new errors_1.ConfigurationError('Invalid configuration', ['No contracts configured and auto-discovery is disabled'], errors_1.ErrorCode.INVALID_CONFIGURATION);
     }
 }
 exports.ContractsResolver = ContractsResolver;

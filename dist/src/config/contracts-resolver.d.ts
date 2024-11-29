@@ -1,4 +1,10 @@
-import { CompileSettings, ContractConfig, TestSettings, UserConfig } from './schema';
+import { UserConfig } from './schema';
+interface DiscoveredContract {
+    path: string;
+    interface: {
+        path: string;
+    };
+}
 export declare class ContractsResolver {
     /**
      * Converts kebab-case or snake_case to PascalCase
@@ -10,29 +16,20 @@ export declare class ContractsResolver {
     private getInterfaceName;
     /**
      * Resolves contract name from Cargo.toml manifest
-     * @throws {ConfigurationError} if Cargo.toml is invalid or cannot be read
      */
     private resolveContractName;
     /**
-     * Finds a Solidity interface file for a contract
-     * @throws {ConfigurationError} if interface file is not found
-     */
-    private findContractInterface;
-    /**
-     * Validates and normalizes a contract path
-     * @throws {ConfigurationError} if path is invalid or Cargo.toml is missing
-     */
-    private validateContractPath;
-    /**
      * Checks if a directory contains a valid Rust contract
-     * Validates presence of Cargo.toml and fluentbase dependency
      */
     private isValidContractDirectory;
     /**
-     * Discovers base contract information in the project
-     * @throws {ConfigurationError} if no valid contracts are found
+     * Finds a Solidity interface file for a contract
      */
-    private discoverContracts;
-    resolve(config: UserConfig, globalCompileConfig: CompileSettings, globalTestConfig: TestSettings): ContractConfig[];
+    private findContractInterface;
+    /**
+     * Discovers contracts in the project
+     */
+    discoverContracts(config: Pick<UserConfig, 'discovery'>): DiscoveredContract[];
 }
+export {};
 //# sourceMappingURL=contracts-resolver.d.ts.map
