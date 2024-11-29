@@ -33,14 +33,6 @@ export declare class ContractsResolver {
      * @throws {ConfigurationError} if no valid contracts are found
      */
     private discoverContracts;
-    /**
-     * Creates full contract configurations by merging discovered contracts with settings
-     */
-    private createContractConfigs;
-    /**
-     * Resolves complete contract configurations.
-     * Handles both explicitly configured contracts and auto-discovered ones.
-     */
     resolve(config: UserConfig, globalCompileConfig: CompileSettings, globalTestConfig: TestSettings): ContractConfig[];
 }
 //# sourceMappingURL=contracts-resolver.d.ts.map

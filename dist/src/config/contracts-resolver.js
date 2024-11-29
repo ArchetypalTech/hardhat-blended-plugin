@@ -153,43 +153,29 @@ class ContractsResolver {
             throw new errors_1.ConfigurationError('Failed to discover contracts', [error.message], errors_1.ErrorCode.DISCOVERY_ERROR);
         }
     }
-    /**
-     * Creates full contract configurations by merging discovered contracts with settings
-     */
-    createContractConfigs(discoveredContracts, globalCompileConfig, globalTestConfig) {
-        return discoveredContracts.map((contract) => (Object.assign(Object.assign({}, contract), { compile: Object.assign({}, globalCompileConfig), test: Object.assign({}, globalTestConfig) })));
-    }
-    /**
-     * Resolves complete contract configurations.
-     * Handles both explicitly configured contracts and auto-discovered ones.
-     */
     resolve(config, globalCompileConfig, globalTestConfig) {
         var _a, _b;
-        if (((_a = config.discovery) === null || _a === void 0 ? void 0 : _a.enabled) === false && !config.contracts) {
-            throw new errors_1.ConfigurationError('Invalid configuration', ['No contracts configured and auto-discovery is disabled'], errors_1.ErrorCode.INVALID_CONFIGURATION);
+        if ((_a = config.contracts) === null || _a === void 0 ? void 0 : _a.length) {
+            return config.contracts.map((contract) => ({
+                path: this.validateContractPath(contract.path),
+                interface: contract.interface,
+                compile: Object.assign(Object.assign({}, globalCompileConfig), (contract.compile || {})),
+                test: Object.assign(Object.assign({}, globalTestConfig), (contract.test || {})),
+            }));
         }
-        let contracts = [];
-        if (config.contracts) {
-            contracts = config.contracts.map((contract) => {
-                var _a, _b;
-                return ({
-                    path: this.validateContractPath(contract.path),
-                    interface: contract.interface,
-                    compile: (_a = contract.compile) !== null && _a !== void 0 ? _a : Object.assign({}, globalCompileConfig),
-                    test: (_b = contract.test) !== null && _b !== void 0 ? _b : Object.assign({}, globalTestConfig),
-                });
-            });
-        }
-        // Discover contracts if none are explicitly configured
-        if (contracts.length == 0 && ((_b = config.discovery) === null || _b === void 0 ? void 0 : _b.enabled) !== false) {
+        if (((_b = config.discovery) === null || _b === void 0 ? void 0 : _b.enabled) !== false) {
             const discoveredContracts = this.discoverContracts(config);
-            const discoveredConfigs = this.createContractConfigs(discoveredContracts, globalCompileConfig, globalTestConfig);
-            contracts = [...contracts, ...discoveredConfigs];
+            if (discoveredContracts.length === 0) {
+                throw new errors_1.ConfigurationError('No contracts found', ['Could not find any contracts in the project'], errors_1.ErrorCode.NO_CONTRACTS);
+            }
+            return discoveredContracts.map((contract) => ({
+                path: contract.path,
+                interface: contract.interface,
+                compile: Object.assign({}, globalCompileConfig),
+                test: Object.assign({}, globalTestConfig),
+            }));
         }
-        if (contracts.length === 0) {
-            throw new errors_1.ConfigurationError('No contracts found', ['Could not find any contracts in the project'], errors_1.ErrorCode.NO_CONTRACTS);
-        }
-        return contracts;
+        throw new errors_1.ConfigurationError('Invalid configuration', ['No contracts configured and auto-discovery is disabled'], errors_1.ErrorCode.INVALID_CONFIGURATION);
     }
 }
 exports.ContractsResolver = ContractsResolver;

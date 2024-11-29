@@ -1,7 +1,9 @@
+// config/schema.ts
 import { z } from 'zod';
 import { DEFAULT_SETTINGS } from './defaults';
 import { ContractsResolver } from './contracts-resolver';
 
+// Base schemas with required fields
 const CompileSettingsSchema = z.object({
   target: z.string(),
   debug: z.boolean(),
@@ -30,13 +32,18 @@ const NodeSettingsSchema = z.object({
   }),
 });
 
+// User input schemas (partial)
+const UserCompileSettingsSchema = CompileSettingsSchema.partial();
+const UserTestSettingsSchema = TestSettingsSchema.partial();
+const UserNodeSettingsSchema = NodeSettingsSchema.deepPartial();
+
 const UserContractConfigSchema = z.object({
   path: z.string(),
   interface: z.object({
     path: z.string(),
   }),
-  compile: CompileSettingsSchema.optional(),
-  test: TestSettingsSchema.optional(),
+  compile: UserCompileSettingsSchema.optional(),
+  test: UserTestSettingsSchema.optional(),
 });
 
 const ContractConfigSchema = z.object({
@@ -48,67 +55,88 @@ const ContractConfigSchema = z.object({
   test: TestSettingsSchema,
 });
 
-// User config, all settings are optional - we will use UserConfig to enrich DEFAULT_SETTINGS
-const UserConfigSchema = z.object({
-  compile: CompileSettingsSchema.optional(),
-  test: TestSettingsSchema.optional(),
-  node: NodeSettingsSchema.optional(),
-  env: z.record(z.string()).optional(),
-  contracts: z.array(UserContractConfigSchema).optional(),
-  discovery: z
-    .object({
-      enabled: z.boolean().optional(),
-      paths: z.array(z.string()).optional(),
-      ignore: z.array(z.string()).optional(),
-    })
-    .optional(),
-});
+// User config with automatic discovery disabling
+const UserConfigSchema = z
+  .object({
+    compile: UserCompileSettingsSchema.optional(),
+    test: UserTestSettingsSchema.optional(),
+    node: UserNodeSettingsSchema.optional(),
+    env: z.record(z.string()).optional(),
+    contracts: z.array(UserContractConfigSchema).optional(),
+    discovery: z
+      .object({
+        enabled: z.boolean().optional(),
+        paths: z.array(z.string()).optional(),
+        ignore: z.array(z.string()).optional(),
+      })
+      .optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.contracts?.length) {
+      if (!data.discovery) {
+        data.discovery = { enabled: false };
+      } else {
+        data.discovery.enabled = false;
+      }
+    }
+  });
 
 export const FluentConfigSchema = UserConfigSchema.transform((config) => {
   const baseConfig = {
     ...DEFAULT_SETTINGS,
     ...config,
+    compile: {
+      ...DEFAULT_SETTINGS.compile,
+      ...(config.compile || {}),
+    },
+    test: {
+      ...DEFAULT_SETTINGS.test,
+      ...(config.test || {}),
+    },
+    node: {
+      docker: {
+        ...DEFAULT_SETTINGS.node.docker,
+        ...(config.node?.docker || {}),
+      },
+      network: {
+        ...DEFAULT_SETTINGS.node.network,
+        ...(config.node?.network || {}),
+      },
+    },
     env: {
       ...DEFAULT_SETTINGS.env,
       ...(config.env || {}),
-    } as Record<string, string>,
+    },
     discovery: {
       ...DEFAULT_SETTINGS.discovery,
-      ...config.discovery,
+      ...(config.discovery || {}),
     },
   };
 
   const resolver = new ContractsResolver();
-  let contracts: z.infer<typeof UserContractConfigSchema>[] = [];
-
-  if (config.contracts && config.contracts.length > 0) {
-    contracts = config.contracts;
-  } else if (baseConfig.discovery.enabled !== false) {
-    contracts = resolver.resolve(baseConfig, baseConfig.compile, baseConfig.test);
-  }
-
-  // Process contracts with proper inheritance
-  const processedContracts = contracts.map((contract) => ({
-    ...contract,
-    compile: {
-      ...baseConfig.compile,
-      ...contract.compile,
-    },
-    test: {
-      ...baseConfig.test,
-      ...contract.test,
-    },
-  }));
+  const contracts = resolver.resolve(config, baseConfig.compile, baseConfig.test);
 
   return {
     ...baseConfig,
-    contracts: processedContracts,
+    contracts,
   };
-});
+}).pipe(
+  z.object({
+    compile: CompileSettingsSchema,
+    test: TestSettingsSchema,
+    node: NodeSettingsSchema,
+    env: z.record(z.string()),
+    discovery: z.object({
+      enabled: z.boolean(),
+      paths: z.array(z.string()),
+      ignore: z.array(z.string()),
+    }),
+    contracts: z.array(ContractConfigSchema),
+  }),
+);
 
 export type UserConfig = z.infer<typeof UserConfigSchema>;
 export type UserContractConfig = z.infer<typeof UserContractConfigSchema>;
-
 export type CompileSettings = z.infer<typeof CompileSettingsSchema>;
 export type TestSettings = z.infer<typeof TestSettingsSchema>;
 export type NodeSettings = z.infer<typeof NodeSettingsSchema>;

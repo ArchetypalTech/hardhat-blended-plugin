@@ -206,68 +206,49 @@ export class ContractsResolver {
     }
   }
 
-  /**
-   * Creates full contract configurations by merging discovered contracts with settings
-   */
-  private createContractConfigs(
-    discoveredContracts: DiscoveredContract[],
-    globalCompileConfig: CompileSettings,
-    globalTestConfig: TestSettings,
-  ): ContractConfig[] {
-    return discoveredContracts.map((contract) => ({
-      ...contract,
-      compile: { ...globalCompileConfig },
-      test: { ...globalTestConfig },
-    }));
-  }
-
-  /**
-   * Resolves complete contract configurations.
-   * Handles both explicitly configured contracts and auto-discovered ones.
-   */
   resolve(
     config: UserConfig,
     globalCompileConfig: CompileSettings,
     globalTestConfig: TestSettings,
   ): ContractConfig[] {
-    if (config.discovery?.enabled === false && !config.contracts) {
-      throw new ConfigurationError(
-        'Invalid configuration',
-        ['No contracts configured and auto-discovery is disabled'],
-        ErrorCode.INVALID_CONFIGURATION,
-      );
-    }
-
-    let contracts: ContractConfig[] = [];
-
-    if (config.contracts) {
-      contracts = config.contracts.map((contract) => ({
+    if (config.contracts?.length) {
+      return config.contracts.map((contract) => ({
         path: this.validateContractPath(contract.path),
         interface: contract.interface,
-        compile: contract.compile ?? { ...globalCompileConfig },
-        test: contract.test ?? { ...globalTestConfig },
+        compile: {
+          ...globalCompileConfig,
+          ...(contract.compile || {}),
+        },
+        test: {
+          ...globalTestConfig,
+          ...(contract.test || {}),
+        },
       }));
     }
 
-    // Discover contracts if none are explicitly configured
-    if (contracts.length == 0 && config.discovery?.enabled !== false) {
+    if (config.discovery?.enabled !== false) {
       const discoveredContracts = this.discoverContracts(config);
-      const discoveredConfigs = this.createContractConfigs(
-        discoveredContracts,
-        globalCompileConfig,
-        globalTestConfig,
-      );
-      contracts = [...contracts, ...discoveredConfigs];
+
+      if (discoveredContracts.length === 0) {
+        throw new ConfigurationError(
+          'No contracts found',
+          ['Could not find any contracts in the project'],
+          ErrorCode.NO_CONTRACTS,
+        );
+      }
+
+      return discoveredContracts.map((contract) => ({
+        path: contract.path,
+        interface: contract.interface,
+        compile: { ...globalCompileConfig },
+        test: { ...globalTestConfig },
+      }));
     }
 
-    if (contracts.length === 0) {
-      throw new ConfigurationError(
-        'No contracts found',
-        ['Could not find any contracts in the project'],
-        ErrorCode.NO_CONTRACTS,
-      );
-    }
-
-    return contracts;
+    throw new ConfigurationError(
+      'Invalid configuration',
+      ['No contracts configured and auto-discovery is disabled'],
+      ErrorCode.INVALID_CONFIGURATION,
+    );
   }
 }

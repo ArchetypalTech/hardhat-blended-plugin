@@ -1,9 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FluentConfigSchema = void 0;
+// config/schema.ts
 const zod_1 = require("zod");
 const defaults_1 = require("./defaults");
 const contracts_resolver_1 = require("./contracts-resolver");
+// Base schemas with required fields
 const CompileSettingsSchema = zod_1.z.object({
     target: zod_1.z.string(),
     debug: zod_1.z.boolean(),
@@ -29,13 +31,17 @@ const NodeSettingsSchema = zod_1.z.object({
         httpPort: zod_1.z.number(),
     }),
 });
+// User input schemas (partial)
+const UserCompileSettingsSchema = CompileSettingsSchema.partial();
+const UserTestSettingsSchema = TestSettingsSchema.partial();
+const UserNodeSettingsSchema = NodeSettingsSchema.deepPartial();
 const UserContractConfigSchema = zod_1.z.object({
     path: zod_1.z.string(),
     interface: zod_1.z.object({
         path: zod_1.z.string(),
     }),
-    compile: CompileSettingsSchema.optional(),
-    test: TestSettingsSchema.optional(),
+    compile: UserCompileSettingsSchema.optional(),
+    test: UserTestSettingsSchema.optional(),
 });
 const ContractConfigSchema = zod_1.z.object({
     path: zod_1.z.string(),
@@ -45,11 +51,12 @@ const ContractConfigSchema = zod_1.z.object({
     compile: CompileSettingsSchema,
     test: TestSettingsSchema,
 });
-// User config, all settings are optional - we will use UserConfig to enrich DEFAULT_SETTINGS
-const UserConfigSchema = zod_1.z.object({
-    compile: CompileSettingsSchema.optional(),
-    test: TestSettingsSchema.optional(),
-    node: NodeSettingsSchema.optional(),
+// User config with automatic discovery disabling
+const UserConfigSchema = zod_1.z
+    .object({
+    compile: UserCompileSettingsSchema.optional(),
+    test: UserTestSettingsSchema.optional(),
+    node: UserNodeSettingsSchema.optional(),
     env: zod_1.z.record(zod_1.z.string()).optional(),
     contracts: zod_1.z.array(UserContractConfigSchema).optional(),
     discovery: zod_1.z
@@ -59,19 +66,37 @@ const UserConfigSchema = zod_1.z.object({
         ignore: zod_1.z.array(zod_1.z.string()).optional(),
     })
         .optional(),
+})
+    .superRefine((data, ctx) => {
+    var _a;
+    if ((_a = data.contracts) === null || _a === void 0 ? void 0 : _a.length) {
+        if (!data.discovery) {
+            data.discovery = { enabled: false };
+        }
+        else {
+            data.discovery.enabled = false;
+        }
+    }
 });
 exports.FluentConfigSchema = UserConfigSchema.transform((config) => {
-    const baseConfig = Object.assign(Object.assign(Object.assign({}, defaults_1.DEFAULT_SETTINGS), config), { env: Object.assign(Object.assign({}, defaults_1.DEFAULT_SETTINGS.env), (config.env || {})), discovery: Object.assign(Object.assign({}, defaults_1.DEFAULT_SETTINGS.discovery), config.discovery) });
+    var _a, _b;
+    const baseConfig = Object.assign(Object.assign(Object.assign({}, defaults_1.DEFAULT_SETTINGS), config), { compile: Object.assign(Object.assign({}, defaults_1.DEFAULT_SETTINGS.compile), (config.compile || {})), test: Object.assign(Object.assign({}, defaults_1.DEFAULT_SETTINGS.test), (config.test || {})), node: {
+            docker: Object.assign(Object.assign({}, defaults_1.DEFAULT_SETTINGS.node.docker), (((_a = config.node) === null || _a === void 0 ? void 0 : _a.docker) || {})),
+            network: Object.assign(Object.assign({}, defaults_1.DEFAULT_SETTINGS.node.network), (((_b = config.node) === null || _b === void 0 ? void 0 : _b.network) || {})),
+        }, env: Object.assign(Object.assign({}, defaults_1.DEFAULT_SETTINGS.env), (config.env || {})), discovery: Object.assign(Object.assign({}, defaults_1.DEFAULT_SETTINGS.discovery), (config.discovery || {})) });
     const resolver = new contracts_resolver_1.ContractsResolver();
-    let contracts = [];
-    if (config.contracts && config.contracts.length > 0) {
-        contracts = config.contracts;
-    }
-    else if (baseConfig.discovery.enabled !== false) {
-        contracts = resolver.resolve(baseConfig, baseConfig.compile, baseConfig.test);
-    }
-    // Process contracts with proper inheritance
-    const processedContracts = contracts.map((contract) => (Object.assign(Object.assign({}, contract), { compile: Object.assign(Object.assign({}, baseConfig.compile), contract.compile), test: Object.assign(Object.assign({}, baseConfig.test), contract.test) })));
-    return Object.assign(Object.assign({}, baseConfig), { contracts: processedContracts });
-});
+    const contracts = resolver.resolve(config, baseConfig.compile, baseConfig.test);
+    return Object.assign(Object.assign({}, baseConfig), { contracts });
+}).pipe(zod_1.z.object({
+    compile: CompileSettingsSchema,
+    test: TestSettingsSchema,
+    node: NodeSettingsSchema,
+    env: zod_1.z.record(zod_1.z.string()),
+    discovery: zod_1.z.object({
+        enabled: zod_1.z.boolean(),
+        paths: zod_1.z.array(zod_1.z.string()),
+        ignore: zod_1.z.array(zod_1.z.string()),
+    }),
+    contracts: zod_1.z.array(ContractConfigSchema),
+}));
 //# sourceMappingURL=schema.js.map

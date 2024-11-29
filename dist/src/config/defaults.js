@@ -31,7 +31,7 @@ exports.DEFAULT_SETTINGS = {
         },
         network: {
             chain: 'dev',
-            dataDir: './datadir',
+            dataDir: './.local-node',
             blockTime: '5sec',
             port: 30305,
             httpPort: 8545,
