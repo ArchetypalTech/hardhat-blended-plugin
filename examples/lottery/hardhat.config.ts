@@ -40,17 +40,7 @@ const config: HardhatUserConfig = {
       },
     },
   },
-  // Fluent plugin configuration
-  fluent: {
-    contracts: [
-      {
-        path: 'contracts/random-generator',
-        interface: {
-          path: 'contracts/IRandomGenerator.sol',
-        },
-      },
-    ],
-  },
+  // Fluent plugin configuration you can override some options, see the plugin documentation
 };
 
 export default config;

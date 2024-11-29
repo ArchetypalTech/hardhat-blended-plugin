@@ -57,8 +57,8 @@ npx hardhat node:fluent
 npx hardhat test --network local
 
 
-# Deploy contracts to Fluent devnet
-npx hardhat ignition deploy ignition/modules/Lottery.ts --network dev
+# Deploy contracts
+npx hardhat ignition deploy ignition/modules/Lottery.ts
 ```
 
 ## Project Setup
@@ -545,84 +545,7 @@ When you run `npx hardhat test`, you'll see output similar to:
 
 ### Plugin Configuration
 
-The plugin provides a comprehensive configuration system to customize compilation, testing, and deployment settings. You can define global settings and override them for specific contracts. By default default configuration is used, so in most cases, you don't need to provide any configuration. However, you can customize the settings by adding a `fluent` key to your `hardhat.config.ts`:
-
-```typescript
-const userConfig: UserConfig = {
-  // Compilation settings
-  compile?: {
-    target: "custom-target", // Target for compilation, e.g., "wasm32-unknown-unknown"
-    debug: true,            // Enable or disable debug information
-    options: ["--custom-option"], // Additional options for the compiler
-  },
-
-  // Test settings
-  test?: {
-    command: "cargo test",        // Command to run tests
-    options: ["--test-option"],   // Additional options for the test command
-    timeout: 1000,                // Timeout for tests in milliseconds
-    retries: 1,                   // Number of retries for failed tests
-  },
-
-  // Node settings
-  node?: {
-    docker: {
-      image: "custom-docker-image", // Docker image for the node
-      tag: "custom-tag",            // Docker image tag
-      pull: "always",               // Pull policy: "always", "if-not-present", or "never"
-    },
-    network: {
-      chain: "custom-chain",        // Blockchain chain identifier
-      dataDir: "./custom-datadir",  // Directory for blockchain data
-      blockTime: "10sec",           // Block time in seconds
-      port: 30310,                  // Port for P2P communication
-      httpPort: 8550,               // HTTP port for RPC communication
-    },
-  },
-
-  // Environment variables
-  env?: {
-    CUSTOM_ENV: "custom-value", // User-defined environment variables
-    RUST_LOG: "debug",          // Log level for Rust components
-  },
-
-  // Contract-specific configuration
-  contracts?: [
-    {
-      path: "test/contract/path", // Path to the contract source
-      interface: {
-        path: "ITestContract.sol", // Path to the contract's interface
-      },
-      compile: {
-        target: "contract-target",   // Contract-specific compilation target
-        debug: false,                // Override debug setting for this contract
-        options: ["--contract-option"], // Specific compiler options for this contract
-      },
-      test: {
-        command: "cargo test",         // Command to test this contract
-        options: ["--contract-test"],  // Specific test options for this contract
-        timeout: 2000,                 // Contract-specific test timeout
-        retries: 0,                    // Retries for this contract
-      },
-    },
-    {
-      path: "test/contract/path2", // Path to a second contract
-      interface: {
-        path: "ITestContract2.sol", // Path to the second contract's interface
-      },
-      // Inherits global compile and test settings if not explicitly overridden
-    },
-  ],
-
-  // Discovery settings
-  discovery?: {
-    enabled: false,                 // Enable or disable auto-discovery
-    paths: ["custom-path"],        // Paths to search for contracts
-    ignore: ["**/ignore/**"],      // Patterns to exclude during discovery
-  },
-};
-
-```
+The plugin provides a comprehensive configuration system to customize compilation, testing, and deployment settings. You can check [docs](https://github.com/fluentlabs-xyz/hardhat-plugin?tab=readme-ov-file#configuration) for more information about configuration.
 
 ### Test Options
 
@@ -850,16 +773,7 @@ describe("Lottery Integration Tests", function () {
 To run the tests, first start a local Fluent node:
 
 ```bash
-docker run --rm -it -p 8545:8545 ghcr.io/fluentlabs-xyz/fluent:latest \
-  --chain=dev \
-  node \
-  --datadir=./datadir \
-  --dev \
-  --full \
-  --http \
-  --http.addr=0.0.0.0 \
-  --port=30305 \
-  --engine.legacy
+npx hardhat node:fluent
 ```
 
 Then run the tests:
@@ -879,23 +793,47 @@ The integration tests verify:
 5. Event emission
 6. Cross-contract interaction between Solidity and Rust
 
-### Testing Considerations
+## Deployment
 
-1. **Network Requirements**
-   - Tests must run on Fluent-compatible networks
-   - Local node recommended for development
-   - Devnet available for staging
+Once you've written and tested your contracts, you can deploy them to a local Fluent node or the Fluent devnet. For deployment you can use the `@nomicfoundation/hardhat-ignition` plugin. So create a new module `ignition/modules/Lottery.ts`:
 
-2. **Time Management**
-   - Local network allows time manipulation
-   - Devnet requires actual time passage
+```typescript
+import { buildModule } from "@nomicfoundation/hardhat-ignition/modules";
+import hre from "hardhat";
 
-3. **Gas and Values**
-   - Use appropriate ETH values for ticket prices
-   - Consider gas costs for complex operations
+const LotteryModule = buildModule("LotteryModule", (m) => {
+  const endTime = m.getParameter(
+    "endTime",
+    Math.floor(Date.now() / 1000) + 60 * 60 // Default to 1 hour from now
+  );
+  const ticketPrice = m.getParameter(
+    "ticketPrice",
+    hre.ethers.parseEther("0.1")
+  );
 
-4. **Error Handling**
-   - Test invalid inputs and edge cases
-   - Verify proper error messages
+  // Deploy RandomGenerator
+  const randomGenerator = m.contract("RandomGenerator");
 
-Next, we'll look at deploying our contracts to the Fluent network.
+  // Deploy Lottery with RandomGenerator address
+  const lottery = m.contract(
+    "Lottery",
+    [
+      endTime,
+      randomGenerator,
+      ticketPrice,
+    ],
+  );
+
+  return { randomGenerator, lottery };
+});
+
+export default LotteryModule;
+```
+
+Then deploy the contracts:
+
+```bash
+npx hardhat ignition deploy ignition/modules/Lottery.ts --network local
+```
+
+That's it! You've successfully deployed your Solidity and Rust contracts using Fluent's blended execution.

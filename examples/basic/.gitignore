@@ -45,3 +45,4 @@ Cargo.lock
 */deployments/
 dataDir
 artifacts
+.local-node
