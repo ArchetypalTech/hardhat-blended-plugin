@@ -30,6 +30,8 @@ _A Hardhat plugin for seamless development of blended smart contract application
   - [Notes](#notes)
   - [Learn More](#learn-more)
   - [Contributing](#contributing)
+    - [Code of Conduct](#code-of-conduct)
+    - [Release Guide](#release-guide)
   - [License](#license)
 
 ## What
@@ -431,6 +433,44 @@ Contributions are welcome! Please:
 1. Fork the repository
 2. Create a feature branch
 3. Submit a Pull Request
+
+### Code of Conduct
+
+We follow the [Contributor Covenant](https://www.contributor-covenant.org/). We expect all contributors to be respectful and inclusive in all interactions. Key points:
+
+- Use welcoming and inclusive language
+- Respect different viewpoints and experiences
+- Accept constructive criticism gracefully
+- Focus on what's best for the community
+
+### Release Guide
+
+1. **Prepare the Codebase**  
+   Ensure the code is ready for release:
+   - Run `pnpm run lint` to check for linting issues.
+   - Run `pnpm run lint:fix` to automatically fix formatting issues.
+   - Run all tests: `pnpm run test`.
+
+2. **Build the Project**  
+   Run `pnpm run build` to compile the project.
+
+3. **Update the Version**  
+   Choose the appropriate version bump:
+   - For a patch release: `pnpm run version:patch`
+   - For a minor release: `pnpm run version:minor`
+   - For a major release: `pnpm run version:major`
+
+4. **Push Changes**  
+   - Push the updated code and tags to the main branch:
+
+     ```bash
+     git push origin main --follow-tags
+     ```
+
+5. **Automatic Deployment**  
+   GitHub Actions will handle publishing the new version upon detecting the pushed tag.
+
+That’s it! 🎉
 
 ## License
 
