@@ -21,7 +21,7 @@ export class RustCompiler {
   }
 
   async compile(options: CompileOptions = {}): Promise<CompileResult[]> {
-    await this.rustBuilder.ensureRustInstalled();
+    this.rustBuilder.ensureRustInstalled();
     return Promise.all(
       this.config.contracts.map((contract) => this.compileContract(contract, options)),
     );
@@ -29,7 +29,7 @@ export class RustCompiler {
 
   private async compileContract(
     contract: ContractConfig,
-    options: CompileOptions,
+    _options: CompileOptions,
   ): Promise<CompileResult> {
     try {
       const contractPath = path.resolve(this.hre.config.paths.root, contract.path);
@@ -38,17 +38,7 @@ export class RustCompiler {
       const contractName = path.basename(this.artifactBuilder.formatContractPath(contractPath));
       const interfaceName = path.basename(interfacePath, path.extname(interfacePath));
 
-      if (options.verbose) {
-        console.log('Compiling with settings:', contract.compile);
-      }
-
-      const wasmPath = await this.rustBuilder.buildWasm(contractPath, contract.compile);
-
-      if (options.verbose) {
-        console.log(`Contract path: ${contractPath}`);
-        console.log(`Contract name: ${contractName}`);
-        console.log(`WASM path: ${wasmPath}`);
-      }
+      const wasmPath = this.rustBuilder.buildWasm(contractPath, contract.compile);
 
       const bytecode = this.getBytecode(wasmPath);
       const interfaceABI = this.getInterfaceABI(contract, interfaceName);
@@ -89,7 +79,7 @@ export class RustCompiler {
     if (!fs.existsSync(interfacePath)) {
       throw CompilerErrors.interfaceNotFound(interfacePath);
     }
-    return JSON.parse(fs.readFileSync(interfacePath, 'utf8')).abi;
+    return (JSON.parse(fs.readFileSync(interfacePath, 'utf8')) as { abi: any[] }).abi;
   }
 
   private getBytecode(wasmPath: string): string {
@@ -100,7 +90,7 @@ export class RustCompiler {
   }
 
   async clean(): Promise<void> {
-    for (const contract of this.config.contracts!) {
+    for (const contract of this.config.contracts) {
       const contractPath = path.resolve(this.hre.config.paths.root, contract.path);
       const formattedPath = this.artifactBuilder.formatContractPath(contract.path);
       const dirs = [

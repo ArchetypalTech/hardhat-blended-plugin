@@ -12,7 +12,7 @@ export function useEnvironment(fixtureProjectName: string) {
   beforeEach('Loading hardhat environment', function () {
     process.chdir(path.join(__dirname, 'fixture-projects', fixtureProjectName));
     process.env.HARDHAT_NETWORK = 'hardhat';
-
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     this.hre = require('hardhat');
   });
 

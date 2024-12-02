@@ -32,7 +32,7 @@ export class RustBuilder {
   /**
    * Builds WASM file from Rust contract
    */
-  async buildWasm(contractPath: string, settings: CompileSettings): Promise<string> {
+  buildWasm(contractPath: string, settings: CompileSettings): string {
     const wasmName = this.getWasmName(contractPath);
     const outputDir = path.join(
       contractPath,
@@ -59,7 +59,7 @@ export class RustBuilder {
       });
 
       return wasmPath;
-    } catch (error: any) {
+    } catch (error: unknown) {
       throw CompilerErrors.compilationFailed(
         contractPath,
         error instanceof Error ? error.message : String(error),
@@ -67,17 +67,16 @@ export class RustBuilder {
     }
   }
 
-  async ensureRustInstalled(): Promise<void> {
+  ensureRustInstalled(): void {
     try {
       execSync('rustc --version', { stdio: 'ignore' });
     } catch {
-      console.log('Installing Rust...');
       try {
         execSync("curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y", {
           stdio: 'inherit',
         });
         process.env.PATH += `:${process.env.HOME}/.cargo/bin`;
-      } catch (error: any) {
+      } catch (_error: unknown) {
         throw CompilerErrors.rustNotInstalled();
       }
     }

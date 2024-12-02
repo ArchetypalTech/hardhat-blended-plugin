@@ -58,7 +58,7 @@ const logger = new logger_1.Logger({ showTimestamp: true });
             }
             catch (error) {
                 logger.error('Test execution failed.', { error });
-                reject(error);
+                reject(error instanceof Error ? error : new Error(String(error)));
             }
         })();
     });

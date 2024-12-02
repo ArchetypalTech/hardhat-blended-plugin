@@ -38,8 +38,9 @@ class ContractsResolver {
             return nameMatch[1];
         }
         catch (error) {
-            if (error instanceof errors_1.ConfigurationError)
+            if (error instanceof errors_1.ConfigurationError) {
                 throw error;
+            }
             throw new errors_1.ConfigurationError('Failed to read Cargo.toml', [error.message], errors_1.ErrorCode.CARGO_READ_ERROR);
         }
     }
@@ -49,8 +50,9 @@ class ContractsResolver {
     isValidContractDirectory(directoryPath) {
         try {
             const cargoPath = path_1.default.join(directoryPath, 'Cargo.toml');
-            if (!fs_1.default.existsSync(cargoPath))
+            if (!fs_1.default.existsSync(cargoPath)) {
                 return false;
+            }
             const cargoContent = fs_1.default.readFileSync(cargoPath, 'utf8');
             return cargoContent.includes('fluentbase');
         }
@@ -79,7 +81,7 @@ class ContractsResolver {
      * Discovers contracts in the project
      */
     discoverContracts(config) {
-        var _a, _b, _c, _d;
+        var _a, _b, _c, _d, _e;
         const projectRoot = process.cwd();
         const searchPaths = ((_a = config.discovery) === null || _a === void 0 ? void 0 : _a.paths)
             ? config.discovery.paths.map((p) => `${p}/**/Cargo.toml`)
@@ -94,6 +96,7 @@ class ContractsResolver {
                     ignore: ignorePatterns,
                 });
                 for (const cargoPath of cargoFiles) {
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
                     const contractDir = path_1.default.dirname(path_1.default.resolve(projectRoot, cargoPath));
                     if (processedDirs.has(contractDir))
                         continue;
@@ -109,9 +112,13 @@ class ContractsResolver {
                         });
                     }
                     catch (error) {
-                        if (error.code === 'INTERFACE_NOT_FOUND') {
-                            console.warn(`Warning: ${error.message} for contract in ${contractDir}`);
-                            console.warn((_d = error.details) === null || _d === void 0 ? void 0 : _d.join('\n  '));
+                        if (!(error instanceof Error)) {
+                            continue;
+                        }
+                        if (error instanceof errors_1.ConfigurationError &&
+                            error.code === errors_1.ErrorCode.INTERFACE_NOT_FOUND) {
+                            const details = (_e = (_d = error.details) === null || _d === void 0 ? void 0 : _d.join('\n  ')) !== null && _e !== void 0 ? _e : '';
+                            console.warn(`Warning: ${error.message} for contract in ${contractDir}\n  ${details}`);
                         }
                         else {
                             console.warn(`Warning: Failed to process contract in ${contractDir}: ${error.message}`);
@@ -125,8 +132,12 @@ class ContractsResolver {
             return discoveredContracts;
         }
         catch (error) {
-            if (error instanceof errors_1.ConfigurationError)
+            if (error instanceof errors_1.ConfigurationError) {
                 throw error;
+            }
+            if (!(error instanceof Error)) {
+                throw new errors_1.ConfigurationError('Failed to discover contracts', ['Unknown error occurred'], errors_1.ErrorCode.DISCOVERY_ERROR);
+            }
             throw new errors_1.ConfigurationError('Failed to discover contracts', [error.message], errors_1.ErrorCode.DISCOVERY_ERROR);
         }
     }

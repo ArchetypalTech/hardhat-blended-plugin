@@ -15,13 +15,23 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", { value: true });
 const chai_1 = require("chai");
 const schema_1 = require("../../src/config/schema");
@@ -30,6 +40,7 @@ const sinon = __importStar(require("sinon"));
 const contracts_resolver_1 = require("../../src/config/contracts-resolver");
 describe('FluentConfigSchema', () => {
     let sandbox;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     let resolveStub;
     beforeEach(() => {
         sandbox = sinon.createSandbox();
@@ -66,6 +77,7 @@ describe('FluentConfigSchema', () => {
             };
             const config = schema_1.FluentConfigSchema.parse(userConfig);
             (0, chai_1.expect)(config.compile.target).to.equal('custom-target');
+            // eslint-disable-next-line @typescript-eslint/no-unused-expressions
             (0, chai_1.expect)(config.compile.debug).to.be.true;
             (0, chai_1.expect)(config.compile.options).to.deep.equal(['--custom-option']);
             (0, chai_1.expect)(config.test).to.deep.equal(defaults_1.DEFAULT_SETTINGS.test);
@@ -161,6 +173,7 @@ describe('FluentConfigSchema', () => {
                 ],
             };
             const config = schema_1.FluentConfigSchema.parse(userConfig);
+            // eslint-disable-next-line @typescript-eslint/no-unused-expressions
             (0, chai_1.expect)(config.discovery.enabled).to.be.false;
             (0, chai_1.expect)(config.contracts).to.have.lengthOf(1);
         });

@@ -6,6 +6,7 @@ import { ContractsResolver } from '../../src/config/contracts-resolver';
 
 describe('FluentConfigSchema', () => {
   let sandbox: sinon.SinonSandbox;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let resolveStub: sinon.SinonStub;
 
   beforeEach(() => {
@@ -49,6 +50,7 @@ describe('FluentConfigSchema', () => {
       const config = FluentConfigSchema.parse(userConfig);
 
       expect(config.compile.target).to.equal('custom-target');
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       expect(config.compile.debug).to.be.true;
       expect(config.compile.options).to.deep.equal(['--custom-option']);
       expect(config.test).to.deep.equal(DEFAULT_SETTINGS.test);
@@ -156,6 +158,7 @@ describe('FluentConfigSchema', () => {
       };
 
       const config = FluentConfigSchema.parse(userConfig);
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       expect(config.discovery.enabled).to.be.false;
       expect(config.contracts).to.have.lengthOf(1);
     });

@@ -77,7 +77,7 @@ exports.FluentConfigSchema = zod_1.z
         const discoveredContracts = resolver.discoverContracts({
             discovery: Object.assign(Object.assign({}, defaults_1.DEFAULT_SETTINGS.discovery), (config.discovery || {})),
         });
-        return Object.assign(Object.assign(Object.assign({}, defaults_1.DEFAULT_SETTINGS), config), { contracts: discoveredContracts.map((contract) => (Object.assign(Object.assign({}, contract), { compile: Object.assign(Object.assign({}, defaults_1.DEFAULT_SETTINGS.compile), (config.compile || {})), test: Object.assign(Object.assign({}, defaults_1.DEFAULT_SETTINGS.test), (config.test || {})) }))) });
+        return Object.assign(Object.assign(Object.assign({}, defaults_1.DEFAULT_SETTINGS), config), { env: Object.assign(Object.assign({}, defaults_1.DEFAULT_SETTINGS.env), (config.env || {})), contracts: discoveredContracts.map((contract) => (Object.assign(Object.assign({}, contract), { compile: Object.assign(Object.assign({}, defaults_1.DEFAULT_SETTINGS.compile), (config.compile || {})), test: Object.assign(Object.assign({}, defaults_1.DEFAULT_SETTINGS.test), (config.test || {})) }))) });
     }
     throw new Error('No contracts configured and auto-discovery is disabled');
 })

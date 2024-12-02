@@ -433,6 +433,9 @@ export declare const FluentConfigSchema: z.ZodPipeline<z.ZodEffects<z.ZodObject<
         ignore: string[];
     } | undefined;
 }>, {
+    env: {
+        RUST_LOG: string;
+    };
     contracts: {
         compile: {
             target: string;
@@ -446,7 +449,7 @@ export declare const FluentConfigSchema: z.ZodPipeline<z.ZodEffects<z.ZodObject<
             command: string;
         };
         path: string;
-        interface: {
+        interface?: {
             path: string;
         };
     }[];
@@ -475,9 +478,6 @@ export declare const FluentConfigSchema: z.ZodPipeline<z.ZodEffects<z.ZodObject<
             httpPort?: number | undefined;
         } | undefined;
     };
-    env: {
-        RUST_LOG: string;
-    } | Record<string, string>;
     discovery: {
         enabled: boolean;
         paths: string[];

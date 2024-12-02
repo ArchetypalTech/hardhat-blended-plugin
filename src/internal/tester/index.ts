@@ -12,6 +12,14 @@ interface RustTest {
   error?: string;
 }
 
+interface ExecSyncError extends Error {
+  status: number | null;
+  signal: NodeJS.Signals | null;
+  stdout: Buffer | string;
+  stderr: Buffer | string;
+  pid: number;
+}
+
 interface TestResult {
   contractPath: string;
   tests: RustTest[];
@@ -34,7 +42,7 @@ export class RustTester {
   }
 
   async runTests(): Promise<TestResult[]> {
-    await this.ensureCargoInstalled();
+    this.ensureCargoInstalled();
     return Promise.all(this.contracts.map((contract) => this.runContractTests(contract)));
   }
 
@@ -62,9 +70,10 @@ export class RustTester {
         ...result,
         success: !result.tests.some((test) => test.status === 'failed'),
       };
-    } catch (error: any) {
-      if (error.stdout) {
-        const result = this.parseTestOutput(error.stdout);
+    } catch (error) {
+      const execError = error as ExecSyncError;
+      if (execError.stdout) {
+        const result = this.parseTestOutput(execError.stdout.toString());
         return {
           contractPath: contract.path,
           ...result,
@@ -135,7 +144,7 @@ export class RustTester {
     return { tests, totalDuration };
   }
 
-  private async ensureCargoInstalled(): Promise<void> {
+  private ensureCargoInstalled() {
     try {
       execSync('cargo --version', { stdio: 'ignore' });
     } catch {

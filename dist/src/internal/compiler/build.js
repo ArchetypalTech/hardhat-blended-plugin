@@ -29,7 +29,7 @@ class RustBuilder {
     /**
      * Builds WASM file from Rust contract
      */
-    async buildWasm(contractPath, settings) {
+    buildWasm(contractPath, settings) {
         const wasmName = this.getWasmName(contractPath);
         const outputDir = path_1.default.join(contractPath, constants_1.COMPILER_CONSTANTS.DIRECTORIES.TARGET, settings.target, 'release');
         const wasmPath = path_1.default.join(outputDir, wasmName);
@@ -48,19 +48,18 @@ class RustBuilder {
             throw errors_1.CompilerErrors.compilationFailed(contractPath, error instanceof Error ? error.message : String(error));
         }
     }
-    async ensureRustInstalled() {
+    ensureRustInstalled() {
         try {
             (0, child_process_1.execSync)('rustc --version', { stdio: 'ignore' });
         }
         catch (_a) {
-            console.log('Installing Rust...');
             try {
                 (0, child_process_1.execSync)("curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y", {
                     stdio: 'inherit',
                 });
                 process.env.PATH += `:${process.env.HOME}/.cargo/bin`;
             }
-            catch (error) {
+            catch (_error) {
                 throw errors_1.CompilerErrors.rustNotInstalled();
             }
         }

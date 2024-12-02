@@ -71,7 +71,7 @@ task(TASK_TEST_RUST, 'Runs Rust contract tests').setAction(async (_, hre) => {
         });
       } catch (error) {
         logger.error('Test execution failed.', { error });
-        reject(error);
+        reject(error instanceof Error ? error : new Error(String(error)));
       }
     })();
   });

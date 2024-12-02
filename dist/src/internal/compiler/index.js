@@ -18,24 +18,16 @@ class RustCompiler {
         this.rustBuilder = new build_1.RustBuilder();
     }
     async compile(options = {}) {
-        await this.rustBuilder.ensureRustInstalled();
+        this.rustBuilder.ensureRustInstalled();
         return Promise.all(this.config.contracts.map((contract) => this.compileContract(contract, options)));
     }
-    async compileContract(contract, options) {
+    async compileContract(contract, _options) {
         try {
             const contractPath = path_1.default.resolve(this.hre.config.paths.root, contract.path);
             const interfacePath = path_1.default.resolve(this.hre.config.paths.root, contract.interface.path);
             const contractName = path_1.default.basename(this.artifactBuilder.formatContractPath(contractPath));
             const interfaceName = path_1.default.basename(interfacePath, path_1.default.extname(interfacePath));
-            if (options.verbose) {
-                console.log('Compiling with settings:', contract.compile);
-            }
-            const wasmPath = await this.rustBuilder.buildWasm(contractPath, contract.compile);
-            if (options.verbose) {
-                console.log(`Contract path: ${contractPath}`);
-                console.log(`Contract name: ${contractName}`);
-                console.log(`WASM path: ${wasmPath}`);
-            }
+            const wasmPath = this.rustBuilder.buildWasm(contractPath, contract.compile);
             const bytecode = this.getBytecode(wasmPath);
             const interfaceABI = this.getInterfaceABI(contract, interfaceName);
             await this.artifactBuilder.saveArtifact(contract, interfaceABI, contractName, interfaceName, bytecode);

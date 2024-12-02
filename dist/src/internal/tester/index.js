@@ -19,7 +19,7 @@ class RustTester {
         this.contracts = config.contracts;
     }
     async runTests() {
-        await this.ensureCargoInstalled();
+        this.ensureCargoInstalled();
         return Promise.all(this.contracts.map((contract) => this.runContractTests(contract)));
     }
     async runContractTests(contract) {
@@ -40,8 +40,9 @@ class RustTester {
             return Object.assign(Object.assign({ contractPath: contract.path }, result), { success: !result.tests.some((test) => test.status === 'failed') });
         }
         catch (error) {
-            if (error.stdout) {
-                const result = this.parseTestOutput(error.stdout);
+            const execError = error;
+            if (execError.stdout) {
+                const result = this.parseTestOutput(execError.stdout.toString());
                 return Object.assign(Object.assign({ contractPath: contract.path }, result), { success: false });
             }
             throw new errors_1.TestError(errors_1.TestErrorCode.TEST_EXECUTION_FAILED, 'Test execution failed', [
@@ -96,7 +97,7 @@ class RustTester {
         }
         return { tests, totalDuration };
     }
-    async ensureCargoInstalled() {
+    ensureCargoInstalled() {
         try {
             (0, child_process_1.execSync)('cargo --version', { stdio: 'ignore' });
         }

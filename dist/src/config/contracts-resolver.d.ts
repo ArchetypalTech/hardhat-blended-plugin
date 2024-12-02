@@ -1,7 +1,7 @@
 import { UserConfig } from './schema';
 interface DiscoveredContract {
     path: string;
-    interface: {
+    interface?: {
         path: string;
     };
 }

@@ -1,7 +1,6 @@
 import { task } from 'hardhat/config';
 import { TASK_CLEAN } from 'hardhat/builtin-tasks/task-names';
 import { RustCompiler } from '../../internal/compiler';
-import { Logger, LogLevel } from '../../utils/logger';
 
 const TASK_CLEAN_RUST = 'clean:rust';
 

@@ -11,7 +11,7 @@ export declare class RustBuilder {
     /**
      * Builds WASM file from Rust contract
      */
-    buildWasm(contractPath: string, settings: CompileSettings): Promise<string>;
-    ensureRustInstalled(): Promise<void>;
+    buildWasm(contractPath: string, settings: CompileSettings): string;
+    ensureRustInstalled(): void;
 }
 //# sourceMappingURL=build.d.ts.map

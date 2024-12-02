@@ -10,6 +10,7 @@ function useEnvironment(fixtureProjectName) {
     beforeEach('Loading hardhat environment', function () {
         process.chdir(path_1.default.join(__dirname, 'fixture-projects', fixtureProjectName));
         process.env.HARDHAT_NETWORK = 'hardhat';
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
         this.hre = require('hardhat');
     });
     afterEach('Resetting hardhat', function () {
