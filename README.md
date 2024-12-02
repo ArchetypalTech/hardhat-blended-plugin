@@ -1,15 +1,45 @@
 # hardhat-plugin
 
-_A Hardhat plugin for seamless compilation and testing of Rust contracts to WebAssembly (WASM) in the Fluent blockchain ecosystem._
+_A Hardhat plugin for seamless development of blended smart contract applications that combine Rust and Solidity contracts in the Fluent blockchain ecosystem._
+
+- [hardhat-plugin](#hardhat-plugin)
+  - [What](#what)
+  - [Installation](#installation)
+  - [Prerequisites](#prerequisites)
+  - [Documentation](#documentation)
+    - [Tasks](#tasks)
+      - [`hardhat compile` and `compile:rust`](#hardhat-compile-and-compilerust)
+      - [`hardhat test` and `test:rust`](#hardhat-test-and-testrust)
+      - [`hardhat node:fluent`](#hardhat-nodefluent)
+      - [`hardhat clean`](#hardhat-clean)
+    - [Configuration](#configuration)
+      - [Basic Configuration](#basic-configuration)
+      - [Contract Discovery](#contract-discovery)
+        - [Auto-Discovery](#auto-discovery)
+        - [Manual Contract Configuration](#manual-contract-configuration)
+      - [Global Settings](#global-settings)
+        - [Compilation Settings](#compilation-settings)
+        - [Test Settings](#test-settings)
+        - [Local Node Settings](#local-node-settings)
+        - [Environment Variables](#environment-variables)
+      - [Configuration Inheritance](#configuration-inheritance)
+      - [Default Values](#default-values)
+  - [Project Structure](#project-structure)
+  - [Examples](#examples)
+    - [Lottery Example](#lottery-example)
+  - [Notes](#notes)
+  - [Learn More](#learn-more)
+  - [Contributing](#contributing)
+  - [License](#license)
 
 ## What
 
-This plugin streamlines the development of WASM smart contracts by:
+This plugin simplifies the development of blended applications by:
 
+- Enabling seamless integration between Rust and Solidity contracts
 - Automatically compiling Rust contracts to WebAssembly
 - Generating Hardhat-compatible artifacts
-- Integrating Rust unit tests with Hardhat's test runner
-- Supporting both Rust and Solidity tests in a single test suite
+- Providing unified testing environment for both Rust and Solidity contracts
 
 ## Installation
 
@@ -33,22 +63,6 @@ Or if you are using TypeScript, in your `hardhat.config.ts`:
 import "@fluent.xyz/hardhat-plugin";
 ```
 
-## Tasks
-
-The plugin adds and modifies the following tasks:
-
-### Compilation
-
-- `compile:rust`: Compiles Rust contracts to WASM
-- `compile`: Extended to include WASM compilation after Solidity
-
-### Testing
-
-- `test:rust`: Runs Rust contract tests
-- `test`: Extended with flags:
-  - `--skip-wasm-tests`: Skip Rust contract tests
-  - `--skip-solidity-tests`: Skip Solidity tests
-
 ## Prerequisites
 
 - Node.js 16+
@@ -56,102 +70,309 @@ The plugin adds and modifies the following tasks:
 - Rust and Cargo
 - Docker (for local testing with Fluent node)
 
-## Configuration
+## Documentation
 
-The plugin extends `HardhatUserConfig` with the optional `compileToWasmConfig` field:
+### Tasks
 
-```typescript
-interface ContractCompileConfig {
-  contractDir: string;      // Path to Rust contract directory
-  interfacePath: string;    // Path to Solidity interface
-  test?: {
-    command?: string;       // Custom test command (default: "cargo test")
-    flags?: string[];       // Additional test flags
-  };
-}
+The plugin adds several tasks to Hardhat for working with Rust contracts:
+
+#### `hardhat compile` and `compile:rust`
+
+Compiles Rust contracts to WebAssembly and generates Hardhat artifacts. The `compile` task is extended to include Rust compilation in the standard Hardhat compilation flow.
+
+```bash
+npx hardhat compile          # Compile full project (Solidity + Rust)
+npx hardhat compile:rust     # Compile only Rust contracts
 ```
 
-Example configuration:
+#### `hardhat test` and `test:rust`
+
+Executes Rust contract unit tests and presents results in Mocha format. The `test` task includes Rust tests in the standard Hardhat test suite.
+
+```bash
+npx hardhat test                         # Run all tests
+npx hardhat test --network local         # Run with local Fluent node
+npx hardhat test --skip-wasm-tests       # Skip Rust tests
+npx hardhat test --skip-solidity-tests   # Skip Solidity tests
+```
+
+Note: The Hardhat network doesn't support WASM execution - use Fluent local node for running tests.
+
+#### `hardhat node:fluent`
+
+Starts a local Fluent node for development and testing.
+
+```bash
+npx hardhat node:fluent         # Start local node with default configuration
+```
+
+The node runs in a Docker container and is preconfigured for development use. Node data (chain data, logs, and configurations) is persisted in the `.local-node` directory, which should be added to your `.gitignore`:
+
+```bash
+# .gitignore
+.local-node/
+```
+
+This ensures consistent state between restarts while keeping repository clean from local development data.
+
+#### `hardhat clean`
+
+Removes compilation artifacts and build directories:
+
+- Rust `target` directories
+- Generated WASM files
+- Hardhat artifacts
+
+```bash
+npx hardhat clean         # Clean build artifacts
+```
+
+All tasks can be configured through the plugin settings in your `hardhat.config.ts`. See the [Configuration](#configuration) section for details.
+
+### Configuration
+
+The plugin can be configured through the `hardhat.config.ts` file. All configuration options are optional and come with sensible defaults.
+
+#### Basic Configuration
 
 ```typescript
 import { HardhatUserConfig } from "hardhat/config";
 import "@fluent.xyz/hardhat-plugin";
-import "@nomicfoundation/hardhat-ethers";
 
 const config: HardhatUserConfig = {
   solidity: "0.8.19",
-  networks: {
-    local: {
-      url: "http://127.0.0.1:8545",
-      accounts: {
-        mnemonic: "test test test test test test test test test test test junk"
-      }
-    }
-  },
-  compileToWasmConfig: [
-    {
-      contractDir: "contracts/my-contract",
-      interfacePath: "contracts/IMyContract.sol",
-      test: {
-        command: "cargo test",  // optional
-        flags: ["--release"]    // optional
-      }
-    }
-  ]
+  fluent: {
+    // Plugin configuration goes here
+  }
 };
 
 export default config;
 ```
 
-## Usage
+#### Contract Discovery
 
-### Compilation task
+The plugin offers two ways to configure contracts: automatic discovery (default) and manual configuration.
 
-```bash
-npx hardhat compile
+##### Auto-Discovery
+
+By default, the plugin automatically discovers Rust contracts in your project - you don't need to configure anything. The following configuration is applied automatically:
+
+```typescript
+fluent: {
+  discovery: {
+    enabled: true,              // Enable/disable auto-discovery
+    paths: ['contracts', 'src'], // Directories to search
+    ignore: ['**/target/**', '**/node_modules/**'] // Patterns to ignore
+  }
+}
 ```
 
-This will:
+This means writing:
 
-1. Compile Solidity contracts (interfaces)
-2. Compile Rust contracts to WASM
-3. Generate Hardhat artifacts
-
-### Testing task
-
-```bash
-# Run all tests (requires local Fluent node)
-npx hardhat test --network local
-
-# Run only Rust tests
-npx hardhat test --skip-solidity-tests
-
-# Run only Solidity tests
-npx hardhat test --skip-wasm-tests --network local
+```typescript
+const config: HardhatUserConfig = {
+  solidity: "0.8.19",
+  fluent: {}
+};
 ```
 
-## Example Project
+is equivalent to explicitly configuring auto-discovery as shown above.
 
-A complete example project is available in `test/fixtures/basic/`, demonstrating:
+You can customize these settings by overriding any of the discovery options:
 
-- Project structure
-- Contract implementation
-- Test setup
-- Local development
+```typescript
+fluent: {
+  discovery: {
+    paths: ['contracts', 'custom-contracts'], // Add custom search paths
+    ignore: ['**/target/**', '**/tests/**']  // Custom ignore patterns
+  }
+}
+```
 
-Key features:
+##### Manual Contract Configuration
 
-- Combined Rust and Solidity test suites
-- Local Fluent node setup
-- Environment configuration
-- Integration tests
+You can explicitly configure contracts instead of using auto-discovery. When contracts are manually configured, auto-discovery is automatically disabled.
 
-To try the example:
+```typescript
+fluent: {
+  contracts: [
+    {
+      path: "contracts/my-contract",
+      interface: {
+        path: "contracts/IMyContract.sol"
+      },
+      // Optional contract-specific settings
+      compile: {
+        debug: false,            // Override global compile settings
+      },
+      test: {
+        timeout: 10000,         // Override global test settings
+      }
+    }
+  ]
+}
+```
 
-```bash
-cd test/fixtures/basic
-pnpm install
-pnpm hardhat test --network local
+#### Global Settings
+
+##### Compilation Settings
+
+Control how your Rust contracts are compiled to WebAssembly:
+
+```typescript
+fluent: {
+  compile: {
+    target: "wasm32-unknown-unknown",  // Target architecture
+    debug: false,                      // Enable debug mode
+    options: [                         // Cargo build options
+      "--release",
+      "--target=wasm32-unknown-unknown",
+      "--no-default-features",
+      "-C link-arg=-zstack-size=131072",
+      "-C target-feature=+bulk-memory",
+      "-C opt-level=z",
+      "-C strip=symbols"
+    ]
+  }
+}
+```
+
+##### Test Settings
+
+Configure how contract tests are executed:
+
+```typescript
+fluent: {
+  test: {
+    command: "cargo test",            // Test command
+    options: ["--release"],           // Command options
+    timeout: 5000,                    // Test timeout in milliseconds
+    retries: 0                        // Number of retry attempts
+  }
+}
+```
+
+##### Local Node Settings
+
+Configure the local Fluent node for development and testing:
+
+```typescript
+fluent: {
+  node: {
+    docker: {
+      image: "ghcr.io/fluentlabs-xyz/fluent",
+      tag: "latest",
+      pull: "if-not-present"         // Docker pull policy
+    },
+    network: {
+      chain: "dev",                  // Chain configuration
+      dataDir: "./datadir",          // Data directory
+      blockTime: "5sec",             // Block time
+      port: 30305,                   // P2P port
+      httpPort: 8545                 // HTTP RPC port
+    }
+  }
+}
+```
+
+##### Environment Variables
+
+Set environment variables for the compilation and test processes:
+
+```typescript
+fluent: {
+  env: {
+    RUST_LOG: "info"
+    // Add any other environment variables
+  }
+}
+```
+
+#### Configuration Inheritance
+
+Settings are merged with the following precedence (highest to lowest):
+
+1. Contract-specific settings (`contracts[].compile`, `contracts[].test`)
+2. Global plugin settings (`compile`, `test`, etc.)
+3. Default settings
+
+Example of inheritance:
+
+```typescript
+fluent: {
+  // Global settings
+  compile: {
+    debug: true
+  },
+  test: {
+    timeout: 5000
+  },
+  // Contract-specific settings override global ones
+  contracts: [
+    {
+      path: "contracts/contract-a",
+      interface: {
+        path: "contracts/IContractA.sol"
+      },
+      compile: {
+        debug: false     // Overrides global debug setting
+      },
+      test: {
+        timeout: 10000  // Overrides global timeout setting
+      }
+    }
+  ]
+}
+```
+
+#### Default Values
+
+The plugin comes with the following default settings:
+
+```typescript
+{
+  compile: {
+    target: "wasm32-unknown-unknown",
+    debug: false,
+    options: [
+      "--release",
+      "--target=wasm32-unknown-unknown",
+      "--no-default-features",
+      "-C link-arg=-zstack-size=131072",
+      "-C target-feature=+bulk-memory",
+      "-C opt-level=z",
+      "-C strip=symbols",
+    ],
+  },
+  test: {
+    command: "cargo test",
+    options: ["--release", "--test-threads=1"],
+    timeout: 5000,
+    retries: 0,
+  },
+  node: {
+    docker: {
+      image: "ghcr.io/fluentlabs-xyz/fluent",
+      tag: "latest",
+      pull: "if-not-present",
+    },
+    network: {
+      chain: "dev",
+      dataDir: "./datadir",
+      blockTime: "5sec",
+      port: 30305,
+      httpPort: 8545,
+    },
+  },
+  discovery: {
+    enabled: true,
+    paths: ["contracts", "src"],
+    ignore: ["**/target/**", "**/node_modules/**"],
+  },
+  env: {
+    RUST_LOG: "info",
+  },
+}
 ```
 
 ## Project Structure
@@ -160,125 +381,48 @@ Recommended project structure:
 
 ```bash
 contracts/
-├── IMyContract.sol         # Solidity interface
-└── my-contract/            # Rust contract
-    ├── Cargo.toml          # Rust config
-    └── lib.rs              # Contract implementation
+├── IRandomGenerator.sol      # Solidity interface for Rust contract
+├── Lottery.sol              # Solidity contract
+└── random-generator/        # Rust contract
+    ├── Cargo.toml
+    └── lib.rs
 test/
-└── MyContract.test.ts      # Integration tests
-hardhat.config.ts           # Hardhat configuration
+├── Lottery.ts              # Integration tests
+└── RandomGenerator.ts
+hardhat.config.ts          # Hardhat configuration
 ```
 
-## Local Development
+## Examples
 
-### 1. Start Local Fluent Node
+Check out our example projects in the `examples` directory:
 
-```bash
-docker run --rm -it -p 8545:8545 ghcr.io/fluentlabs-xyz/fluent:v0.1.0-dev.8 \
-  --chain=dev \
-  node \
-  --datadir=./datadir \
-  --dev \
-  --full \
-  --http \
-  --http.addr=0.0.0.0 \
-  --port=30305 \
-  --engine.legacy
-```
+### Lottery Example
 
-### 2. Run Tests
+A complete lottery application demonstrating:
+
+- Integration between Rust and Solidity contracts
+- Random number generation in Rust
+- Contract deployment using Ignition
+- Integration tests
+- Local development setup
 
 ```bash
-# Ensure you're using the local network
-npx hardhat test --network local
+cd examples/lottery
+pnpm install
+pnpm hardhat compile
+# In a separate terminal
+pnpm hardhat node:fluent
+pnpm hardhat test --network local
 ```
 
 ## Notes
 
 - The Hardhat network doesn't support WASM execution - use Fluent local node
-- Rust tests are automatically integrated into the test suite
-- Contract name must match the package name in Cargo.toml
 
-## CI/CD
+## Learn More
 
-This project uses GitHub Actions for automated testing and publishing. The workflow is designed to maintain code quality and streamline the release process.
-
-### Continuous Integration
-
-On every pull request and push to main:
-
-- Runs linting checks
-- Executes all tests (both Rust and Solidity)
-- Verifies build process
-
-### Release Process
-
-We use semantic versioning (MAJOR.MINOR.PATCH). To publish a new version:
-
-1. Ensure you're on the `main` branch with latest changes:
-
-```bash
-git checkout main
-git pull origin main
-```
-
-2. Run tests and create a new version:
-
-```bash
-# For patch releases (bug fixes):
-pnpm run version:patch
-
-# For minor releases (new features):
-pnpm run version:minor
-
-# For major releases (breaking changes):
-pnpm run version:major
-```
-
-These commands will automatically:
-
-- Run all tests
-- Update version in package.json
-- Create a git commit for the version bump
-- Create a git tag
-- Push changes and tags to GitHub
-
-3. The GitHub Actions workflow will then:
-
-- Build the project
-- Run final verification tests
-- Publish to NPM registry if all checks pass
-
-### Manual Release (if needed)
-
-If you need more control over the release process:
-
-1. Update version in package.json manually
-2. Create and push a tag:
-
-```bash
-git add package.json
-git commit -m "chore: release version x.x.x"
-git tag vx.x.x
-git push && git push --tags
-```
-
-### Release Scripts
-
-Available npm scripts for version management:
-
-- `release` - Run tests and build before release
-- `version:patch` - Bump patch version (0.0.X)
-- `version:minor` - Bump minor version (0.X.0)
-- `version:major` - Bump major version (X.0.0)
-
-### Version Commit Convention
-
-Version commits should follow the format:
-
-```bash
-chore: release version x.x.x
-```
+- [Fluent Documentation](https://docs.fluentlabs.xyz)
+- [Developer Preview](https://docs.fluentlabs.xyz/learn/developer-preview/connect-to-the-fluent-devnet)
 
 ## Contributing
 
@@ -288,11 +432,6 @@ Contributions are welcome! Please:
 2. Create a feature branch
 3. Submit a Pull Request
 
-## Learn More
-
-- [Fluent Documentation](https://docs.fluentlabs.xyz)
-- [Developer Preview](https://docs.fluentlabs.xyz/learn/developer-preview/connect-to-the-fluent-devnet)
-
 ## License
 
-MIT License - see LICENSE file for details.
+MIT License

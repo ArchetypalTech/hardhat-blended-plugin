@@ -1,0 +1,48 @@
+# Dependencies
+node_modules/
+cargo-target/
+target/
+
+# Hardhat
+cache/
+# artifacts/
+typechain/
+typechain-types/
+
+# IDEs and editors
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# Build output
+dist/
+build/
+
+# Coverage
+coverage/
+coverage.json
+
+# Rust specific
+Cargo.lock
+**/*.rs.bk
+
+# Hardhat deployment
+*/deployments/
+dataDir
+artifacts
+.local-node
