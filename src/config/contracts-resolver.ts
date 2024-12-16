@@ -172,6 +172,7 @@ export class ContractsResolver {
       return discoveredContracts;
     } catch (error) {
       if (error instanceof ConfigurationError) {
+        console.log("FOOOOOOPPPPPPPP!!!!");
         throw error;
       }
 

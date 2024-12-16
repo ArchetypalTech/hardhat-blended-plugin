@@ -133,6 +133,7 @@ class ContractsResolver {
         }
         catch (error) {
             if (error instanceof errors_1.ConfigurationError) {
+                console.log("FOOOOOOPPPPPPPP!!!!");
                 throw error;
             }
             if (!(error instanceof Error)) {
