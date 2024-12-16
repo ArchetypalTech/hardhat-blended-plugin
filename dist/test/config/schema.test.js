@@ -150,6 +150,7 @@ describe('FluentConfigSchema', () => {
         it('should throw error when discovery is disabled and no contracts provided', () => {
             const userConfig = {
                 discovery: {
+                    errorOnContractDiscovery: true,
                     enabled: false,
                     paths: ['contracts', 'src'],
                     ignore: ['**/target/**', '**/node_modules/**'],
@@ -161,6 +162,7 @@ describe('FluentConfigSchema', () => {
         it('should disable discovery when contracts are provided', () => {
             const userConfig = {
                 discovery: {
+                    errorOnContractDiscovery: true,
                     enabled: true,
                     paths: ['contracts', 'src'],
                     ignore: ['**/target/**', '**/node_modules/**'],

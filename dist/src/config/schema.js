@@ -56,6 +56,7 @@ exports.FluentConfigSchema = zod_1.z
         .optional(),
     discovery: zod_1.z
         .object({
+        errorOnContractDiscovery: zod_1.z.boolean(),
         enabled: zod_1.z.boolean(),
         paths: zod_1.z.array(zod_1.z.string()),
         ignore: zod_1.z.array(zod_1.z.string()),
@@ -63,9 +64,9 @@ exports.FluentConfigSchema = zod_1.z
         .optional(),
 })
     .transform((config) => {
-    var _a, _b;
+    var _a, _b, _c, _d;
     if ((_a = config.contracts) === null || _a === void 0 ? void 0 : _a.length) {
-        return Object.assign(Object.assign(Object.assign({}, defaults_1.DEFAULT_SETTINGS), config), { env: Object.assign(Object.assign({}, defaults_1.DEFAULT_SETTINGS.env), (config.env || {})), discovery: Object.assign(Object.assign({}, defaults_1.DEFAULT_SETTINGS.discovery), { enabled: false, ignore: [], paths: [] }), contracts: config.contracts.map((contract) => ({
+        return Object.assign(Object.assign(Object.assign({}, defaults_1.DEFAULT_SETTINGS), config), { env: Object.assign(Object.assign({}, defaults_1.DEFAULT_SETTINGS.env), (config.env || {})), discovery: Object.assign(Object.assign({}, defaults_1.DEFAULT_SETTINGS.discovery), { errorOnContractDiscovery: false, enabled: false, ignore: [], paths: [] }), contracts: config.contracts.map((contract) => ({
                 path: contract.path,
                 interface: contract.interface,
                 compile: Object.assign(Object.assign(Object.assign({}, defaults_1.DEFAULT_SETTINGS.compile), (config.compile || {})), (contract.compile || {})),
@@ -74,8 +75,9 @@ exports.FluentConfigSchema = zod_1.z
     }
     if (((_b = config.discovery) === null || _b === void 0 ? void 0 : _b.enabled) !== false) {
         const resolver = new contracts_resolver_1.ContractsResolver();
+        // we need to NOT error out when no contracts are in the project
         const discoveredContracts = resolver.discoverContracts({
-            discovery: Object.assign(Object.assign({}, defaults_1.DEFAULT_SETTINGS.discovery), (config.discovery || {})),
+            discovery: Object.assign(Object.assign(Object.assign({}, defaults_1.DEFAULT_SETTINGS.discovery), (config.discovery || {})), { errorOnContractDiscovery: (_d = (_c = config.discovery) === null || _c === void 0 ? void 0 : _c.errorOnContractDiscovery) !== null && _d !== void 0 ? _d : defaults_1.DEFAULT_SETTINGS.discovery.errorOnContractDiscovery }),
         });
         return Object.assign(Object.assign(Object.assign({}, defaults_1.DEFAULT_SETTINGS), config), { env: Object.assign(Object.assign({}, defaults_1.DEFAULT_SETTINGS.env), (config.env || {})), contracts: discoveredContracts.map((contract) => (Object.assign(Object.assign({}, contract), { compile: Object.assign(Object.assign({}, defaults_1.DEFAULT_SETTINGS.compile), (config.compile || {})), test: Object.assign(Object.assign({}, defaults_1.DEFAULT_SETTINGS.test), (config.test || {})) }))) });
     }
@@ -87,6 +89,7 @@ exports.FluentConfigSchema = zod_1.z
     node: NodeSettingsSchema,
     env: zod_1.z.record(zod_1.z.string()),
     discovery: zod_1.z.object({
+        errorOnContractDiscovery: zod_1.z.boolean(),
         enabled: zod_1.z.boolean(),
         paths: zod_1.z.array(zod_1.z.string()),
         ignore: zod_1.z.array(zod_1.z.string()),

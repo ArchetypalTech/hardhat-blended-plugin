@@ -39,6 +39,7 @@ exports.DEFAULT_SETTINGS = {
     },
     // By default we use auto discovery for contracts
     discovery: {
+        errorOnContractDiscovery: false,
         enabled: true,
         paths: ['contracts', 'src'],
         ignore: ['**/target/**', '**/node_modules/**'],

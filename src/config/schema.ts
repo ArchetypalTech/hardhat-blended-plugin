@@ -60,6 +60,7 @@ export const FluentConfigSchema = z
       .optional(),
     discovery: z
       .object({
+        errorOnContractDiscovery: z.boolean(),
         enabled: z.boolean(),
         paths: z.array(z.string()),
         ignore: z.array(z.string()),
@@ -77,6 +78,7 @@ export const FluentConfigSchema = z
         },
         discovery: {
           ...DEFAULT_SETTINGS.discovery,
+          errorOnContractDiscovery: false,
           enabled: false,
           ignore: [],
           paths: [],
@@ -100,10 +102,12 @@ export const FluentConfigSchema = z
 
     if (config.discovery?.enabled !== false) {
       const resolver = new ContractsResolver();
+      // we need to NOT error out when no contracts are in the project
       const discoveredContracts = resolver.discoverContracts({
         discovery: {
           ...DEFAULT_SETTINGS.discovery,
           ...(config.discovery || {}),
+          errorOnContractDiscovery: config.discovery?.errorOnContractDiscovery ?? DEFAULT_SETTINGS.discovery.errorOnContractDiscovery,
         },
       });
 
@@ -137,6 +141,7 @@ export const FluentConfigSchema = z
       node: NodeSettingsSchema,
       env: z.record(z.string()),
       discovery: z.object({
+        errorOnContractDiscovery: z.boolean(),
         enabled: z.boolean(),
         paths: z.array(z.string()),
         ignore: z.array(z.string()),

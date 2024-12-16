@@ -26,6 +26,7 @@ export declare const DEFAULT_SETTINGS: {
         };
     };
     discovery: {
+        errorOnContractDiscovery: boolean;
         enabled: boolean;
         paths: string[];
         ignore: string[];
