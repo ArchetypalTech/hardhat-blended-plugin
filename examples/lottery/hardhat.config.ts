@@ -40,6 +40,15 @@ const config: HardhatUserConfig = {
       },
     },
   },
+  fluent: {
+    discovery: {
+      errorOnContractDiscovery: false,
+      enabled: true,
+      paths: [],
+      ignore: []
+    }
+  }
+
   // Fluent plugin configuration you can override some options, see the plugin documentation
 };
 

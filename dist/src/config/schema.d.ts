@@ -322,20 +322,20 @@ export declare const FluentConfigSchema: z.ZodPipeline<z.ZodEffects<z.ZodObject<
         } | undefined;
     }>, "many">>;
     discovery: z.ZodOptional<z.ZodObject<{
-        errorOnContractDiscovery: z.ZodBoolean;
-        enabled: z.ZodBoolean;
-        paths: z.ZodArray<z.ZodString, "many">;
-        ignore: z.ZodArray<z.ZodString, "many">;
+        errorOnContractDiscovery: z.ZodOptional<z.ZodBoolean>;
+        enabled: z.ZodOptional<z.ZodBoolean>;
+        paths: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+        ignore: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     }, "strip", z.ZodTypeAny, {
-        errorOnContractDiscovery: boolean;
-        enabled: boolean;
-        paths: string[];
-        ignore: string[];
+        errorOnContractDiscovery?: boolean | undefined;
+        enabled?: boolean | undefined;
+        paths?: string[] | undefined;
+        ignore?: string[] | undefined;
     }, {
-        errorOnContractDiscovery: boolean;
-        enabled: boolean;
-        paths: string[];
-        ignore: string[];
+        errorOnContractDiscovery?: boolean | undefined;
+        enabled?: boolean | undefined;
+        paths?: string[] | undefined;
+        ignore?: string[] | undefined;
     }>>;
 }, "strip", z.ZodTypeAny, {
     test?: {
@@ -382,10 +382,10 @@ export declare const FluentConfigSchema: z.ZodPipeline<z.ZodEffects<z.ZodObject<
     } | undefined;
     env?: Record<string, string> | undefined;
     discovery?: {
-        errorOnContractDiscovery: boolean;
-        enabled: boolean;
-        paths: string[];
-        ignore: string[];
+        errorOnContractDiscovery?: boolean | undefined;
+        enabled?: boolean | undefined;
+        paths?: string[] | undefined;
+        ignore?: string[] | undefined;
     } | undefined;
 }, {
     test?: {
@@ -432,10 +432,10 @@ export declare const FluentConfigSchema: z.ZodPipeline<z.ZodEffects<z.ZodObject<
     } | undefined;
     env?: Record<string, string> | undefined;
     discovery?: {
-        errorOnContractDiscovery: boolean;
-        enabled: boolean;
-        paths: string[];
-        ignore: string[];
+        errorOnContractDiscovery?: boolean | undefined;
+        enabled?: boolean | undefined;
+        paths?: string[] | undefined;
+        ignore?: string[] | undefined;
     } | undefined;
 }>, {
     env: {
@@ -484,10 +484,10 @@ export declare const FluentConfigSchema: z.ZodPipeline<z.ZodEffects<z.ZodObject<
         } | undefined;
     };
     discovery: {
-        errorOnContractDiscovery: boolean;
-        enabled: boolean;
-        paths: string[];
-        ignore: string[];
+        errorOnContractDiscovery?: boolean | undefined;
+        enabled?: boolean | undefined;
+        paths?: string[] | undefined;
+        ignore?: string[] | undefined;
     };
 }, {
     test?: {
@@ -534,10 +534,10 @@ export declare const FluentConfigSchema: z.ZodPipeline<z.ZodEffects<z.ZodObject<
     } | undefined;
     env?: Record<string, string> | undefined;
     discovery?: {
-        errorOnContractDiscovery: boolean;
-        enabled: boolean;
-        paths: string[];
-        ignore: string[];
+        errorOnContractDiscovery?: boolean | undefined;
+        enabled?: boolean | undefined;
+        paths?: string[] | undefined;
+        ignore?: string[] | undefined;
     } | undefined;
 }>, z.ZodObject<{
     compile: z.ZodObject<{

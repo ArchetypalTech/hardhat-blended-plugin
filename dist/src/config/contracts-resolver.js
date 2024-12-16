@@ -81,7 +81,7 @@ class ContractsResolver {
      * Discovers contracts in the project
      */
     discoverContracts(config) {
-        var _a, _b, _c, _d, _e;
+        var _a, _b, _c, _d, _e, _f, _g;
         const projectRoot = process.cwd();
         const searchPaths = ((_a = config.discovery) === null || _a === void 0 ? void 0 : _a.paths)
             ? config.discovery.paths.map((p) => `${p}/**/Cargo.toml`)
@@ -89,6 +89,7 @@ class ContractsResolver {
         const ignorePatterns = (_c = (_b = config.discovery) === null || _b === void 0 ? void 0 : _b.ignore) !== null && _c !== void 0 ? _c : ['**/target/**', '**/node_modules/**'];
         const discoveredContracts = [];
         const processedDirs = new Set();
+        const throwOnContractDiscovery = (_e = (_d = config.discovery) === null || _d === void 0 ? void 0 : _d.errorOnContractDiscovery) !== null && _e !== void 0 ? _e : true;
         try {
             for (const pattern of searchPaths) {
                 const cargoFiles = glob_1.default.sync(pattern, {
@@ -117,7 +118,7 @@ class ContractsResolver {
                         }
                         if (error instanceof errors_1.ConfigurationError &&
                             error.code === errors_1.ErrorCode.INTERFACE_NOT_FOUND) {
-                            const details = (_e = (_d = error.details) === null || _d === void 0 ? void 0 : _d.join('\n  ')) !== null && _e !== void 0 ? _e : '';
+                            const details = (_g = (_f = error.details) === null || _f === void 0 ? void 0 : _f.join('\n  ')) !== null && _g !== void 0 ? _g : '';
                             console.warn(`Warning: ${error.message} for contract in ${contractDir}\n  ${details}`);
                         }
                         else {
@@ -126,14 +127,13 @@ class ContractsResolver {
                     }
                 }
             }
-            if (discoveredContracts.length === 0) {
+            if (discoveredContracts.length === 0 && throwOnContractDiscovery) {
                 throw new errors_1.ConfigurationError('No contracts found', ['Could not find any valid contracts in the project'], errors_1.ErrorCode.NO_CONTRACTS);
             }
             return discoveredContracts;
         }
         catch (error) {
             if (error instanceof errors_1.ConfigurationError) {
-                console.log("FOOOOOOPPPPPPPP!!!!");
                 throw error;
             }
             if (!(error instanceof Error)) {

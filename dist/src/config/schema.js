@@ -61,7 +61,7 @@ exports.FluentConfigSchema = zod_1.z
         paths: zod_1.z.array(zod_1.z.string()),
         ignore: zod_1.z.array(zod_1.z.string()),
     })
-        .optional(),
+        .partial().optional(),
 })
     .transform((config) => {
     var _a, _b, _c, _d;

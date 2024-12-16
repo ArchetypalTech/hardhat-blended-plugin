@@ -7,7 +7,7 @@
     "clean": "npx hardhat clean"
   },
   "dependencies": {
-    "@fluent.xyz/hardhat-plugin": "file:../../",
+    "@fluent.xyz/hardhat-plugin": "file:../..",
     "hardhat": "^2.22.15"
   },
   "devDependencies": {

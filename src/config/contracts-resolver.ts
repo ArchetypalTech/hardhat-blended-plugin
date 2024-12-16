@@ -114,6 +114,7 @@ export class ContractsResolver {
     const ignorePatterns = config.discovery?.ignore ?? ['**/target/**', '**/node_modules/**'];
     const discoveredContracts: DiscoveredContract[] = [];
     const processedDirs = new Set<string>();
+    const throwOnContractDiscovery: boolean = config.discovery?.errorOnContractDiscovery ?? true;
 
     try {
       for (const pattern of searchPaths) {
@@ -161,7 +162,7 @@ export class ContractsResolver {
         }
       }
 
-      if (discoveredContracts.length === 0) {
+      if (discoveredContracts.length === 0 && throwOnContractDiscovery) {
         throw new ConfigurationError(
           'No contracts found',
           ['Could not find any valid contracts in the project'],
@@ -172,7 +173,6 @@ export class ContractsResolver {
       return discoveredContracts;
     } catch (error) {
       if (error instanceof ConfigurationError) {
-        console.log("FOOOOOOPPPPPPPP!!!!");
         throw error;
       }
 

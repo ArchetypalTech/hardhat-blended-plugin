@@ -6,7 +6,7 @@ settings:
 
 dependencies:
   '@fluent.xyz/hardhat-plugin':
-    specifier: file:../../
+    specifier: file:../..
     version: file:../..(hardhat@2.22.17)
   hardhat:
     specifier: ^2.22.15

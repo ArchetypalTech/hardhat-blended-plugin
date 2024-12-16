@@ -65,7 +65,7 @@ export const FluentConfigSchema = z
         paths: z.array(z.string()),
         ignore: z.array(z.string()),
       })
-      .optional(),
+      .partial().optional(),
   })
   .transform((config) => {
     if (config.contracts?.length) {
